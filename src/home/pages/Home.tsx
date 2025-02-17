@@ -1,4 +1,5 @@
 import { Header } from "@/shared/ui/Header/Header"; 
+import { Footer } from "@/shared/ui/Footer/Footer";
 import { HeaderInfo } from "../ui/HeaderInfo";
 import { AIOptionSelection } from "../ui/AIOptionSelection";
 import { Cards } from "../ui/Cards";
@@ -26,6 +27,7 @@ function Home () {
                 </p>
             </div>
             <AISection />
+            <Footer />
         </>
     );
 }

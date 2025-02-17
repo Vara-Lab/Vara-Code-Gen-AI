@@ -8,7 +8,7 @@ export const AISection = () => {
         className={styles.container}
     >
         <AIOptionSelection  
-            options={['Smart Contracts', 'Frontend', 'Server', 'Web3 abstraction']}
+            options={['Frontend', 'Smart Contracts', 'Server', 'Web3 abstraction']}
         />
         <AIPromptTextArea />
     </div>
