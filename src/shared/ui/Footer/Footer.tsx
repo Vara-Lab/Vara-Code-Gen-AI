@@ -44,19 +44,19 @@ export const Footer = () => {
             <div
                 className={styles.iconsLinksContainer}
             >
-                <a href="">
+                <a href="https://x.com/VaraNetwork">
                     <XIcon />
                 </a>
-                <a href="">
+                <a href="https://github.com/gear-foundation">
                     <GitHubIcon />
                 </a>
-                <a href="">
+                <a href="https://medium.com/@VaraNetwork">
                     <MediumIcon />
                 </a>
-                <a href="">
+                <a href="https://discord.com/invite/x8ZeSy6S6K">
                     <DiscordIcon /> 
                 </a>
-                <a href="">
+                <a href="https://t.me/VaraNetwork_Global">
                     <TelegramIcon />
                 </a>
             </div>

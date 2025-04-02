@@ -1,6 +1,4 @@
 import { useAccount, useApi } from "@gear-js/react-hooks";
-import { ApiLoader } from "@/shared/components";
-import { Header } from "@/shared/components/layout";
 import { withProviders } from "@/app/hocs";
 import { useEnableWeb3 } from "./app/hooks";
 // import { Routing } from "./pages";
@@ -40,3 +38,18 @@ function Component() {
 }
 
 export const App = withProviders(Component);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

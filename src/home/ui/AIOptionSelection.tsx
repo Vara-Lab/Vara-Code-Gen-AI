@@ -1,4 +1,3 @@
-import { Radio, radioStyles, LabelContainer, Button } from '@gear-js/vara-ui';
 import { GrayContainer } from '@/shared/ui/Containers/GrayContainer/GrayContainer';
 import { WhiteContainer } from '@/shared/ui/Containers/WhiteContainer/WhiteContainer';
 import { useState } from 'react';
@@ -7,6 +6,8 @@ import clsx from 'clsx';
 
 interface Props {
     options: string[];
+    currentSelected: number;
+    waitingForResponse?: boolean;
     selected?: (name: string, id: number) => void;
 }
 
@@ -18,8 +19,8 @@ const whiteContainerStyles = {
   transition: 'all ease-in-out 0.2s'
 };
 
-export const AIOptionSelection = ({ options, selected = (name: string, id: number) => {} }: Props) => {
-  const [optionSelected, setOptionSelected] = useState(0);
+export const AIOptionSelection = ({ options, currentSelected, waitingForResponse = false, selected = (name: string, id: number) => {} }: Props) => {
+  const [optionSelected, setOptionSelected] = useState(currentSelected);
 
   return (
     <div>
@@ -35,31 +36,33 @@ export const AIOptionSelection = ({ options, selected = (name: string, id: numbe
           {
             options.map((value, index) => (
               <WhiteContainer 
-                    key={index}
-                    onClick={() => {
-                      setOptionSelected(index);
-                      selected(value, index);
-                    }}
-                    style={
-                      optionSelected == index
-                        ? whiteContainerStyles
-                        : { 
-                            ...whiteContainerStyles,  
-                            background: 'none',
-                            boxShadow: 'none',
-                            cursor: 'pointer'
-                          }
-                    }
-                  >
-                    <p
-                      className={clsx(
-                        styles.text,
-                        (optionSelected != index) && styles.textUnSelected
-                      )}
-                    >
-                      {value}
-                    </p>  
-                  </WhiteContainer>
+                key={index}
+                onClick={() => {
+                  if (waitingForResponse) return;
+                  setOptionSelected(index);
+                  selected(value, index);
+                }}
+                style={
+                  optionSelected == index
+                    ? whiteContainerStyles
+                    : { 
+                        ...whiteContainerStyles,  
+                        background: 'none',
+                        boxShadow: 'none',
+                        cursor: waitingForResponse ? 'not-allowed' : 'pointer',
+                      }
+                }
+              >
+                <p
+                  className={clsx(
+                    styles.text,
+                    (optionSelected != index) && styles.textUnSelected,
+                    (optionSelected != index) && waitingForResponse && styles.cursorNotAllowed
+                  )}
+                >
+                  {value}
+                </p>  
+              </WhiteContainer>
             ))
           }
         </GrayContainer>

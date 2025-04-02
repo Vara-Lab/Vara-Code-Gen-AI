@@ -1,12 +1,9 @@
 import { Header } from "@/shared/ui/Header/Header"; 
 import { Footer } from "@/shared/ui/Footer/Footer";
 import { HeaderInfo } from "../ui/HeaderInfo";
-import { AIOptionSelection } from "../ui/AIOptionSelection";
 import { Cards } from "../ui/Cards";
-import { LabelContainer } from "@gear-js/vara-ui";
 import { AISection } from "../ui/AISection";
 import styles from '../styles/home.module.scss';
-import clsx from "clsx";
 
 function Home () {
     return (
@@ -18,7 +15,7 @@ function Home () {
             </Header>
             <Cards />
             <div className={styles.questionInfoContainer}>
-                <h2 className={styles.titleQuestion}>
+                <h2 className={styles.titleQuestion} id="subtitle-ready-to-build">
                     Ready to build secure and scalable dApps?
                 </h2>
                 <p className={styles.questionInfo}>

@@ -8,16 +8,18 @@ interface Props {
     description: string;
     icon: React.ReactNode;
     dotsBackground?: boolean;
+    linesBackground?: boolean;
 }
 
-export const MediumCard = ({ title, description, icon, dotsBackground = false }: Props) => {
+export const MediumCard = ({ title, description, icon, dotsBackground = false, linesBackground = false }: Props) => {
   return (
     <div 
         className={
             clsx(
                 cardsStyles.card, 
                 styles.mediumInfoCard,
-                dotsBackground && styles.dotsBackground
+                dotsBackground && styles.dotsBackground,
+                linesBackground && styles.linesBackground
             )
         }
     >

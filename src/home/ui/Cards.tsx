@@ -47,6 +47,7 @@ export const Cards = () => {
             title="Continuous Monitoring"
             description="Real-time performance tracking & incident alerts with AI-driven insights."
             icon={<DataIcon />}
+            linesBackground
         />
     </div>
   )
