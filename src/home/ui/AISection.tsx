@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@gear-js/vara-ui';
 import { 
   sendFrontendGaslessQuestion,
-  sendFrontendPaylessQuestion,
+  sendFrontendSignlessQuestion,
   sendFrontendSailsCallsQuestion,
   sendFrontendSailsjsQuestion,
   sendFrontendWalletconnectQuestion,
@@ -23,6 +23,7 @@ interface ResponseTitles {
 interface Data {
   responseTitle: string | [string,string];
   optionSelected: number;
+  frontendOptionSelected: number;
 }
 
 const options = ['Frontend', 'Smart Contracts', 'Server', 'Web3 abstraction'];
@@ -32,10 +33,10 @@ const responseTitles: ResponseTitles = {
   'Server': ['SCRIPT', 'CLIENT'], 
   'Web3 abstraction': 'ABSTRACTION'
 }
-const frontendOptiones = [
+const frontendOptions = [
   'SailsCalls',
-  'GassLess',
-  'PayLess',
+  'GasLess',
+  'Signless',
   'Sailsjs',
   'WalletConnect'
 ];
@@ -47,17 +48,19 @@ export const AISection = () => {
   const [optionFrontendVariantSelected, setOptionFrontendVariantSelected] = useState(0);
   const [aiResponseTitle, setAIResponseTitle] = useState(responseTitles[options[optionSelected]]);
   const [codes, setCodes] = useState<string[]>([]);
-  const [serverScriptSelected, setServerScriptSelected] = useState(true);
+  // const [serverScriptSelected, setServerScriptSelected] = useState(true);
+  const [clientSelected, setClientSelected] = useState(false);
   const [dataToUse, setDataToUse] = useState<Data>({ 
     responseTitle: '',
-    optionSelected: 0
+    optionSelected: 0,
+    frontendOptionSelected: 0
   });
 
   const alert = useAlert();
 
   const { hasCopied, onCopy } = useClipboard(
     dataToUse.optionSelected === 1
-      ? codes[serverScriptSelected ? 0 : 1]
+      ? codes[!clientSelected ? 0 : 1]
       : codes[0]
   );
 
@@ -70,7 +73,8 @@ export const AISection = () => {
 
     setDataToUse({
       responseTitle: aiResponseTitle,
-      optionSelected
+      optionSelected,
+      frontendOptionSelected: optionFrontendVariantSelected
     });
     setWaitingForAgent(true);
     setCodes([]);
@@ -80,6 +84,12 @@ export const AISection = () => {
     try {
       switch (optionSelected) {
         case 0:
+          if (optionFrontendVariantSelected === 4) {
+            console.log('Sending frontend WalletConnect question ...');
+            codes = [await sendFrontendWalletconnectQuestion(prompt)];
+            break;
+          }
+
           if (!idl) {
             setWaitingForAgent(false);
             alert.error('the idl is missing');
@@ -89,26 +99,20 @@ export const AISection = () => {
           switch (optionFrontendVariantSelected) {
             case 0:
               console.log('Sending frontend SailsCalls question ...');
-              codes = [await sendFrontendSailsCallsQuestion(prompt, idl)];
+              codes = await sendFrontendSailsCallsQuestion(prompt, idl);
               break;
             case 1:
               console.log('Sending frontend GasLess question ...');
-              codes = [await sendFrontendGaslessQuestion(prompt, idl)];
+              codes = await sendFrontendGaslessQuestion(prompt, idl);
               break;
             case 2:
-              console.log('Sending frontend PayLess question ...');
-              codes = [await sendFrontendPaylessQuestion(prompt, idl)]
+              console.log('Sending frontend Signless question ...');
+              codes = await sendFrontendSignlessQuestion(prompt, idl);
               break;
             case 3:
               console.log('Sending frontend SailsJs question ...');
-              codes = [await sendFrontendSailsjsQuestion(prompt, idl)]
+              codes = await sendFrontendSailsjsQuestion(prompt, idl);
               break;
-            case 4:
-              console.log('Sending frontend WalletConnect question ...');
-              codes = [await sendFrontendWalletconnectQuestion(prompt, idl)]
-              break;
-            default:
-              console.log('No frontend variant selected!');
           }
           break;
         case 1:
@@ -170,7 +174,7 @@ export const AISection = () => {
           onPromptChange={handleOnPromptChange}
           defaultPrompt={prompts[optionSelected]}
           disableComponents={waitingForAgent}
-          optionVariants={optionSelected === 0 ? frontendOptiones : undefined}
+          optionVariants={optionSelected === 0 ? frontendOptions : undefined}
           optionVariantSelected={optionSelected === 0 ? optionFrontendVariantSelected : undefined}
           onOptionVariantSelected = {optionSelected === 0 
             ? (optionSelected) => {
@@ -184,26 +188,27 @@ export const AISection = () => {
             <AIResponse
               responseTitle={
                 dataToUse.optionSelected === 2 
-                 ? dataToUse.responseTitle[ serverScriptSelected ? 0 : 1 ]
+                 ? dataToUse.responseTitle[ !clientSelected ? 0 : 1 ]
                  : dataToUse.responseTitle as string
               }
               code={ 
-                dataToUse.optionSelected === 2
-                  ? codes[serverScriptSelected ? 0 : 1]
+                  (dataToUse.optionSelected === 2 || (dataToUse.optionSelected === 0 && dataToUse.frontendOptionSelected !== 4))
+                  ? codes[!clientSelected ? 0 : 1]
                   : codes[0]
               }
               lang={dataToUse.optionSelected === 1 ? 'rust' : 'javascript'}
               cornerLeftButtons={
                 <>
                   {
-                    dataToUse.optionSelected === 2 && (
+                    ((dataToUse.optionSelected === 0 && dataToUse.frontendOptionSelected !== 4)  || dataToUse.optionSelected === 2) && (
+
                       <Button
-                        text={ !serverScriptSelected ? 'Script' : 'Client' }
+                        text={ clientSelected ? (dataToUse.optionSelected === 2 ? 'Script' : 'Component') : 'Client' }
                         size="x-large"
                         color='contrast'
                         className={styles.button}
                         onClick={() => {
-                          setServerScriptSelected(!serverScriptSelected);
+                          setClientSelected(!clientSelected);
                         }}
                       />
                     )

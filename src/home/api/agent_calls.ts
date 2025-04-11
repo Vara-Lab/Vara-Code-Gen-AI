@@ -3,17 +3,18 @@ import axios from "axios";
 
 const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const FRONTEND_SAILSCALLS = 'sailscalls_frontend_agent';
-const FRONTEND_GASLESS = 'gasless_frontend_agent';
-const FRONTEND_PAYLESS = 'payless_frontend_agent';
+const FRONTEND_GASLESS = 'gasless_frontend_agent ';
+const FRONTEND_SIGNLESS = 'signless_frontend_agent';
 const FRONTEND_SAILSJS = 'sailsjs_frontend_agent';
 const FRONTEND_WALLETCONNECT = 'walletconnect_frontend_agent';
 const CONTRACT_SERVICE_URL = 'service_smartcontract_agent'
-const SERVER_CLIENT_URL = 'client_server_agent';
 const SERVER_SCRIPT_URL = 'script_server_agent';
+const IDL_CLIENT_URL = 'client_server_agent';
 
-export const sendFrontendSailsCallsQuestion = (question: string, idl: string): Promise<string> => {
+export const sendFrontendSailsCallsQuestion = (question: string, idl: string): Promise<string[]> => {
     const url = API_URL + FRONTEND_SAILSCALLS;
     let response: AgentResponse | null = null;
+    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -23,6 +24,7 @@ export const sendFrontendSailsCallsQuestion = (question: string, idl: string): P
                     question: question + '\n' + idl
                 }
             );
+            client_code = await client_idl_code(idl);
 
             response = temp.data;
         } catch(e) {
@@ -47,13 +49,16 @@ export const sendFrontendSailsCallsQuestion = (question: string, idl: string): P
             return;
         }
 
-        resolve(response.answer.replace(/javascript|```|jsx|typescript/g, ""));   
+        const sailsCallsComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
+
+        resolve([sailsCallsComponent, client_code]);   
     });
 };
 
-export const sendFrontendGaslessQuestion = (question: string, idl: string): Promise<string> => {
+export const sendFrontendGaslessQuestion = (question: string, idl: string): Promise<string[]> => {
     const url = API_URL + FRONTEND_GASLESS;
     let response: AgentResponse | null = null;
+    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -63,6 +68,7 @@ export const sendFrontendGaslessQuestion = (question: string, idl: string): Prom
                     question: question + '\n' + idl
                 }
             );
+            client_code = await client_idl_code(idl);
 
             response = temp.data;
         } catch(e) {
@@ -87,13 +93,16 @@ export const sendFrontendGaslessQuestion = (question: string, idl: string): Prom
             return;
         }
 
-        resolve(response.answer.replace(/javascript|```|jsx|typescript/g, "")); 
+        const gaslessComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
+
+        resolve([gaslessComponent, client_code]); 
     });
 };
 
-export const sendFrontendPaylessQuestion = (question: string, idl: string): Promise<string> => {
-    const url = API_URL + FRONTEND_PAYLESS;
+export const sendFrontendSignlessQuestion = (question: string, idl: string): Promise<string[]> => {
+    const url = API_URL + FRONTEND_SIGNLESS;
     let response: AgentResponse | null = null;
+    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -103,6 +112,7 @@ export const sendFrontendPaylessQuestion = (question: string, idl: string): Prom
                     question: question + '\n' + idl
                 }
             );
+            client_code = await client_idl_code(idl);
 
             response = temp.data;
         } catch(e) {
@@ -127,13 +137,16 @@ export const sendFrontendPaylessQuestion = (question: string, idl: string): Prom
             return;
         }
 
-        resolve(response.answer.replace(/javascript|```|jsx|typescript/g, "")); 
+        const signlessComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
+
+        resolve([signlessComponent, client_code]); 
     });
 };
 
-export const sendFrontendSailsjsQuestion = (question: string, idl: string): Promise<string> => {
+export const sendFrontendSailsjsQuestion = (question: string, idl: string): Promise<string[]> => {
     const url = API_URL + FRONTEND_SAILSJS;
     let response: AgentResponse | null = null;
+    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
@@ -143,6 +156,7 @@ export const sendFrontendSailsjsQuestion = (question: string, idl: string): Prom
                     question: question + '\n' + idl
                 }
             );
+            client_code = await client_idl_code(idl);   
 
             response = temp.data;
         } catch(e) {
@@ -167,11 +181,13 @@ export const sendFrontendSailsjsQuestion = (question: string, idl: string): Prom
             return;
         }
 
-        resolve(response.answer.replace(/javascript|```|jsx|typescript/g, "")); 
+        const sailsJsComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
+
+        resolve([sailsJsComponent, client_code]);    
     });
 };
 
-export const sendFrontendWalletconnectQuestion = (question: string, idl: string): Promise<string> => {
+export const sendFrontendWalletconnectQuestion = (question: string): Promise<string> => {
     const url = API_URL + FRONTEND_WALLETCONNECT;
     let response: AgentResponse | null = null;
 
@@ -180,7 +196,7 @@ export const sendFrontendWalletconnectQuestion = (question: string, idl: string)
             const temp = await axios.post(
                 url,
                 {
-                    question: question + '\n' + idl
+                    question: question
                 }
             );
 
@@ -276,7 +292,7 @@ export const sendServerQuestion = (question: string, idl: string): Promise<[stri
         let script_code: string;
 
         try {
-            client_code = await server_client_code(idl);
+            client_code = await client_idl_code(idl);
             script_code = await server_script_code(question, idl);
         } catch(e) {
             console.log(e);
@@ -289,8 +305,8 @@ export const sendServerQuestion = (question: string, idl: string): Promise<[stri
     });
 }
 
-const server_client_code = (idl: string): Promise<string> => {
-    const url = API_URL + SERVER_CLIENT_URL;
+const client_idl_code = (idl: string): Promise<string> => {
+    const url = API_URL + IDL_CLIENT_URL;
 
     return new Promise(async (resolve, reject) => {
         let response: AgentResponse | null = null;
@@ -325,9 +341,6 @@ const server_client_code = (idl: string): Promise<string> => {
             reject('No response from server');
             return;
         }
-
-        console.log('Response: ');
-        console.log(response);
 
         resolve(response.answer.replace(/javascript|```|jsx|typescript/g, ""));     
     });
