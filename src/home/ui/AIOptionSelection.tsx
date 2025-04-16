@@ -1,14 +1,15 @@
 import { GrayContainer } from '@/shared/ui/Containers/GrayContainer/GrayContainer';
 import { WhiteContainer } from '@/shared/ui/Containers/WhiteContainer/WhiteContainer';
 import { useState } from 'react';
+import type { AIPromptOptions } from '../models/ai_options';
 import styles from '../styles/ai_option_selection.module.scss';
 import clsx from 'clsx';
 
 interface Props {
     options: string[];
-    currentSelected: number;
+    currentSelected: AIPromptOptions;
     waitingForResponse?: boolean;
-    selected?: (name: string, id: number) => void;
+    selected?: (name: string, id: AIPromptOptions) => void;
 }
 
 const whiteContainerStyles = {
@@ -19,8 +20,8 @@ const whiteContainerStyles = {
   transition: 'all ease-in-out 0.2s'
 };
 
-export const AIOptionSelection = ({ options, currentSelected, waitingForResponse = false, selected = (name: string, id: number) => {} }: Props) => {
-  const [optionSelected, setOptionSelected] = useState(currentSelected);
+export const AIOptionSelection = ({ options, currentSelected, waitingForResponse = false, selected = (name: string, id: AIPromptOptions) => {} }: Props) => {
+  const [optionSelected, setOptionSelected] = useState<AIPromptOptions>(currentSelected);
 
   return (
     <div>
@@ -39,11 +40,11 @@ export const AIOptionSelection = ({ options, currentSelected, waitingForResponse
                 key={index}
                 onClick={() => {
                   if (waitingForResponse) return;
-                  setOptionSelected(index);
-                  selected(value, index);
+                  setOptionSelected(options[index] as AIPromptOptions);
+                  selected(value, options[index] as AIPromptOptions);
                 }}
                 style={
-                  optionSelected == index
+                  optionSelected == options[index] as AIPromptOptions
                     ? whiteContainerStyles
                     : { 
                         ...whiteContainerStyles,  
@@ -56,8 +57,8 @@ export const AIOptionSelection = ({ options, currentSelected, waitingForResponse
                 <p
                   className={clsx(
                     styles.text,
-                    (optionSelected != index) && styles.textUnSelected,
-                    (optionSelected != index) && waitingForResponse && styles.cursorNotAllowed
+                    (optionSelected != options[index] as AIPromptOptions) && styles.textUnSelected,
+                    (optionSelected != options[index] as AIPromptOptions) && waitingForResponse && styles.cursorNotAllowed
                   )}
                 >
                   {value}

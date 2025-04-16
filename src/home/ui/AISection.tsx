@@ -13,8 +13,14 @@ import {
   sendContractQuestion, 
   sendServerQuestion
 } from '../api/agent_calls';
-import styles from '../styles/ai_section.module.scss';
 import { useAlert } from '@gear-js/react-hooks';
+import type { 
+  AIPromptOptions,
+  AIFrontendFrontendOptions,
+} from '../models/ai_options';
+import styles from '../styles/ai_section.module.scss';
+
+type AgentCode = string | null;
 
 interface ResponseTitles {
   [key: string]: string | [string, string]
@@ -22,18 +28,18 @@ interface ResponseTitles {
 
 interface Data {
   responseTitle: string | [string,string];
-  optionSelected: number;
-  frontendOptionSelected: number;
+  optionSelected: AIPromptOptions;
+  frontendOptionSelected: AIFrontendFrontendOptions;
 }
 
 const options = ['Frontend', 'Smart Contracts', 'Server', 'Web3 abstraction'];
 const responseTitles: ResponseTitles = {
-  'Frontend': 'REACT COMPONENT',
-  'Smart Contracts': 'SMART CONTRACT',
+  'Frontend': ['REACT COMPONENT', 'CLIENT'],
+  'Smart Contracts': ['LIB.RS', 'SERVICE'],
   'Server': ['SCRIPT', 'CLIENT'], 
   'Web3 abstraction': 'ABSTRACTION'
 }
-const frontendOptions = [
+const AIFrontendFrontendOptions = [
   'SailsCalls',
   'GasLess',
   'Signless',
@@ -44,24 +50,27 @@ const frontendOptions = [
 export const AISection = () => {
   const [prompts, setPrompts] = useState(['', '', '', '']);
   const [waitingForAgent, setWaitingForAgent] = useState(false);
-  const [optionSelected, setOptionSelected] = useState(0);
-  const [optionFrontendVariantSelected, setOptionFrontendVariantSelected] = useState(0);
-  const [aiResponseTitle, setAIResponseTitle] = useState(responseTitles[options[optionSelected]]);
-  const [codes, setCodes] = useState<string[]>([]);
-  // const [serverScriptSelected, setServerScriptSelected] = useState(true);
-  const [clientSelected, setClientSelected] = useState(false);
+  const [optionSelected, setOptionSelected] = useState<AIPromptOptions>('Frontend');
+  const [optionFrontendVariantSelected, setOptionFrontendVariantSelected] = useState<AIFrontendFrontendOptions>('SailsCalls');
+  const [aiResponseTitle, setAIResponseTitle] = useState(responseTitles[optionSelected]);
+  const [codes, setCodes] = useState<[AgentCode, AgentCode]>([null, null]);
+  const [firstOptionSelected, setFirstOptionSelected] = useState(false); 
   const [dataToUse, setDataToUse] = useState<Data>({ 
     responseTitle: '',
-    optionSelected: 0,
-    frontendOptionSelected: 0
+    optionSelected: 'Frontend',
+    frontendOptionSelected: 'SailsCalls'
   });
 
   const alert = useAlert();
 
+  // [TODO]: add this section has a bug, solve it to copy the correct code
   const { hasCopied, onCopy } = useClipboard(
-    dataToUse.optionSelected === 1
-      ? codes[!clientSelected ? 0 : 1]
-      : codes[0]
+    dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect'
+      ? codes[0] as string
+      : codes[firstOptionSelected ? 0 : 1] as string
+    // dataToUse.optionSelected === 'Smart Contracts'
+    //   ? codes[!firstOptionSelected ? 0 : 1]
+    //   : codes[0]
   );
 
   const handleOnSubmitPrompt = async (prompt: string, idl: string | null = '') => {
@@ -77,16 +86,16 @@ export const AISection = () => {
       frontendOptionSelected: optionFrontendVariantSelected
     });
     setWaitingForAgent(true);
-    setCodes([]);
+    setCodes([null, null]);
 
-    let codes: string[] = [];
+    let codes: [AgentCode, AgentCode] = [null, null];
   
     try {
       switch (optionSelected) {
-        case 0:
-          if (optionFrontendVariantSelected === 4) {
+        case 'Frontend':
+          if (optionFrontendVariantSelected === 'WalletConnect') {
             console.log('Sending frontend WalletConnect question ...');
-            codes = [await sendFrontendWalletconnectQuestion(prompt)];
+            codes = [await sendFrontendWalletconnectQuestion(prompt), null];
             break;
           }
 
@@ -97,39 +106,38 @@ export const AISection = () => {
           }
 
           switch (optionFrontendVariantSelected) {
-            case 0:
+            case 'SailsCalls':
               console.log('Sending frontend SailsCalls question ...');
               codes = await sendFrontendSailsCallsQuestion(prompt, idl);
               break;
-            case 1:
+            case 'GasLess':
               console.log('Sending frontend GasLess question ...');
               codes = await sendFrontendGaslessQuestion(prompt, idl);
               break;
-            case 2:
+            case 'Signless':
               console.log('Sending frontend Signless question ...');
               codes = await sendFrontendSignlessQuestion(prompt, idl);
               break;
-            case 3:
+            case 'Sailsjs':
               console.log('Sending frontend SailsJs question ...');
               codes = await sendFrontendSailsjsQuestion(prompt, idl);
               break;
           }
           break;
-        case 1:
+        case 'Smart Contracts':
           console.log('Sendind contract question ...')
-          codes = [await sendContractQuestion(prompt)];
+          codes = await sendContractQuestion(prompt);
           break;
-        case 2:
+        case 'Server':
           if (!idl) {
             setWaitingForAgent(false);
             alert.error('the idl is missing');
             return;
           }
           console.log('Sending server question ...');
-          // codes = [ script, client ]
           codes = await sendServerQuestion(prompt, idl);
           break;
-        case 4: 
+        case 'Web3 abstraction': 
           console.log('sending web3 abstraction question');
           break;
         default:
@@ -149,13 +157,17 @@ export const AISection = () => {
   }
 
   const handleOnPromptChange = (promptUpdated: string) => {
+    const aiIndexOptionSelected = options.indexOf(optionSelected);
     const userPrompts = [...prompts];
-    userPrompts[optionSelected] = promptUpdated;
+    userPrompts[aiIndexOptionSelected] = promptUpdated;
     setPrompts(userPrompts);
   }
 
-  const handleSelected = (_name: string, id: number) => {
-    setAIResponseTitle(responseTitles[options[id]]);
+  const handleSelected = (_name: string, id: AIPromptOptions) => {
+    const aiIndexOptionSelected = options.indexOf(id);
+    const title = responseTitles[options[aiIndexOptionSelected]];
+
+    setAIResponseTitle(title);
     setOptionSelected(id);  
   };
 
@@ -172,11 +184,12 @@ export const AISection = () => {
         <AIPromptArea 
           onSubmitPrompt={handleOnSubmitPrompt}
           onPromptChange={handleOnPromptChange}
-          defaultPrompt={prompts[optionSelected]}
+          defaultPrompt={prompts[options.indexOf(optionSelected)]}
           disableComponents={waitingForAgent}
-          optionVariants={optionSelected === 0 ? frontendOptions : undefined}
-          optionVariantSelected={optionSelected === 0 ? optionFrontendVariantSelected : undefined}
-          onOptionVariantSelected = {optionSelected === 0 
+          optionVariants={optionSelected === 'Frontend' ? AIFrontendFrontendOptions : undefined}
+          optionVariantSelected={optionSelected === 'Frontend' ? optionFrontendVariantSelected : undefined}
+          optionSelected={optionSelected}
+          onOptionVariantSelected = {optionSelected === 'Frontend' 
             ? (optionSelected) => {
                 setOptionFrontendVariantSelected(optionSelected);
               }
@@ -184,33 +197,58 @@ export const AISection = () => {
           }
         />
         {
-          codes.length > 0 && (
+          codes[0] && (
             <AIResponse
               responseTitle={
-                dataToUse.optionSelected === 2 
-                 ? dataToUse.responseTitle[ !clientSelected ? 0 : 1 ]
-                 : dataToUse.responseTitle as string
+                dataToUse.optionSelected !== 'Web3 abstraction'
+                ? dataToUse.responseTitle[ firstOptionSelected ? 0 : 1 ]
+                : 'Abstraction'
               }
               code={ 
-                  (dataToUse.optionSelected === 2 || (dataToUse.optionSelected === 0 && dataToUse.frontendOptionSelected !== 4))
-                  ? codes[!clientSelected ? 0 : 1]
-                  : codes[0]
+                (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect')
+                  ? codes[0] as string
+                  : codes[firstOptionSelected ? 0 : 1] as string
               }
-              lang={dataToUse.optionSelected === 1 ? 'rust' : 'javascript'}
+              lang={dataToUse.optionSelected === 'Smart Contracts' ? 'rust' : 'javascript'}
               cornerLeftButtons={
                 <>
                   {
-                    ((dataToUse.optionSelected === 0 && dataToUse.frontendOptionSelected !== 4)  || dataToUse.optionSelected === 2) && (
-
+                    // ((dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected !== 'WalletConnect')  || dataToUse.optionSelected === 'Server') && (
+                    (!(dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect')) && (<>
                       <Button
-                        text={ clientSelected ? (dataToUse.optionSelected === 2 ? 'Script' : 'Component') : 'Client' }
+                        // text={ firstOptionSelected ? (dataToUse.optionSelected === 'Server' ? 'Script' : 'Component') : 'Client' }
+                        text={
+                          dataToUse.optionSelected === 'Smart Contracts'
+                          ? 'service'
+                          : 'client'
+                        }
                         size="x-large"
-                        color='contrast'
+                        color={ !firstOptionSelected ? 'primary' : 'contrast' }
                         className={styles.button}
                         onClick={() => {
-                          setClientSelected(!clientSelected);
+                          setFirstOptionSelected(false);
                         }}
                       />
+                      <Button
+                        // text={ firstOptionSelected ? (dataToUse.optionSelected === 'Server' ? 'Script' : 'Component') : 'Client' }
+                        text={
+                          dataToUse.optionSelected === 'Frontend'
+                          ? 'Component'
+                          : dataToUse.optionSelected === 'Server'
+                          ? 'Script'
+                          : dataToUse.optionSelected === 'Smart Contracts'
+                          ? 'lib.rs'
+                          : 'Abstraction'
+                        }
+                        size="x-large"
+                        // color='contrast'
+                        color={ firstOptionSelected ? 'primary' : 'contrast' }
+                        className={styles.button}
+                        onClick={() => {
+                          setFirstOptionSelected(true);
+                        }}
+                      />
+                      </>
                     )
                   }
                   <Button
@@ -230,3 +268,26 @@ export const AISection = () => {
     </div>
   );
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

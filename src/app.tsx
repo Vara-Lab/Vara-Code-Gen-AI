@@ -1,10 +1,7 @@
 import { useAccount, useApi } from "@gear-js/react-hooks";
 import { withProviders } from "@/app/hocs";
 import { useEnableWeb3 } from "./app/hooks";
-// import { Routing } from "./pages";
 import { Routing } from "./router/AppRoutes";
-import { useInitSails } from "./app/hooks";
-import { CONTRACT_DATA, sponsorName, sponsorMnemonic } from "./app/consts";
 import "@gear-js/vara-ui/dist/style.css";
 
 function Component() {

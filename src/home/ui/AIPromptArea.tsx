@@ -11,37 +11,38 @@ import {
   useState,
   useEffect
 } from "react";
+import type { AIFrontendFrontendOptions, AIPromptOptions } from "../models/ai_options";
 import styles from '../styles/ai_prompt_area.module.scss';
 import clsx from "clsx";
 
 interface Props {
-  // generated_codes?: (codes: string[]) => void;
-  // onSendPromptPresset?: () => void;
-  // promptType: number;
   onSubmitPrompt: (prompt: string, idl: string | null) => void;
   onPromptChange?: (prompt: string) => void;
   disableComponents?: boolean;
   defaultPrompt?: string;
   optionVariants?: string[];
-  optionVariantSelected?: number;
-  onOptionVariantSelected?: (optionSelected: number) => void;
+  optionSelected?: AIPromptOptions;
+  optionVariantSelected?: AIFrontendFrontendOptions;
+  onOptionVariantSelected?: (optionSelected: AIFrontendFrontendOptions) => void;
 }
 
-// export const AIPromptTextArea = ({ generated_codes, promptType, defaultValue = '', onPromptChange, onSendPromptPresset}: Props) => {
 export const AIPromptArea = ({ 
   onSubmitPrompt, 
   onPromptChange, 
   disableComponents = false, 
   defaultPrompt = '', 
   optionVariants,
-  optionVariantSelected = 0,
+  optionSelected = 'Frontend',
+  optionVariantSelected = 'SailsCalls',
   onOptionVariantSelected = () => {}
 }: Props) => {
   const fileRef = useRef<string | null>(null);
   const [promptText, setPromptText] = useState(defaultPrompt);
+  const [idlName, setIdlName] = useState<string | null>(null);
 
-  const handleSubmitIDL = (fileContent: string) => {
+  const handleSubmitIDL = (fileContent: string, fileName: string) => {
     fileRef.current = fileContent;
+    setIdlName(fileName);
   }
 
   const handlePromptText = (e:  React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -67,27 +68,20 @@ export const AIPromptArea = ({
           {
             optionVariants &&
             <Select 
-              // options={[
-              //   {
-              //     label: 'xd',
-              //     value: 'xd',
-              //   },
-              //   {
-              //     label: 'xd1',
-              //     value: 'xd1',
-              //   },
-              // ]}
+              className={styles.selectFrontendOptions}
               disabled={disableComponents}
               onChange={(e) => {
-                const variantSelected = optionVariants.indexOf(e.target.value);
+                const indexVariantSelected = optionVariants.indexOf(e.target.value);
+                const variantSelected = optionVariants[indexVariantSelected] as AIFrontendFrontendOptions;
                 onOptionVariantSelected(variantSelected);
               }}
+              
               options={
-                optionVariants.map((value, index) => {
+                optionVariants.map(value => {
                   return {
                     label: value,
                     value,
-                    selected: index === optionVariantSelected,
+                    selected: value === optionVariantSelected,
                   }
                 })
               }
@@ -105,21 +99,37 @@ export const AIPromptArea = ({
               )
             }
           />
-          <Button  
-            text="Open in Gitpod"
-            icon={GitpodIcon}
-            color="contrast"
-            isLoading={disableComponents}
-            className={
-              clsx(
-                styles.button
-              )
+          <a 
+            href={
+              optionSelected === 'Frontend'
+              ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Frontend-Template.git'
+              : optionSelected === 'Smart Contracts'
+              ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Smart-Program-Template.git'
+              : '#'
             }
-          />
+            target="_blank"
+          >
+            <Button  
+              text="Open in Gitpod"
+              icon={GitpodIcon}
+              color="contrast"
+              isLoading={disableComponents}
+              className={
+                clsx(
+                  styles.button
+                )
+              }
+            />
+          </a>
           <ButtonUploadIDL 
             onIDLFileSubmit={handleSubmitIDL}
             disableButton={disableComponents}
           />
+          <p
+            className={styles.idlName}
+          >
+            {idlName ? idlName : ''}
+          </p>
         </>
       )}
     >

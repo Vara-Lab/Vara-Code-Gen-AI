@@ -1,13 +1,12 @@
 import { 
     useRef,
-    useState
 } from "react";
 import { Button } from "@gear-js/vara-ui";
 import clsx from "clsx";
 import styles from "../../styles/Buttons/button.module.scss";
 
 interface Props {
-    onIDLFileSubmit: (fileContent: string) => void;
+    onIDLFileSubmit: (fileContent: string, fileName: string) => void;
     disableButton?: boolean;
 }
 
@@ -37,7 +36,8 @@ export const ButtonUploadIDL = ({ onIDLFileSubmit, disableButton }: Props) => {
 
         reader.onload = () => {
             const content = reader.result as string;
-            onIDLFileSubmit(content);
+            const fileName = file.name; 
+            onIDLFileSubmit(content, fileName);
         };
 
         reader.onerror = () => {
