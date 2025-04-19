@@ -11,7 +11,10 @@ import {
   useState,
   useEffect
 } from "react";
-import type { AIFrontendFrontendOptions, AIPromptOptions } from "../models/ai_options";
+import type { 
+  AIJavascriptComponentsOptions, 
+  AIPromptOptions 
+} from "../models/ai_options";
 import styles from '../styles/ai_prompt_area.module.scss';
 import clsx from "clsx";
 
@@ -22,8 +25,8 @@ interface Props {
   defaultPrompt?: string;
   optionVariants?: string[];
   optionSelected?: AIPromptOptions;
-  optionVariantSelected?: AIFrontendFrontendOptions;
-  onOptionVariantSelected?: (optionSelected: AIFrontendFrontendOptions) => void;
+  optionVariantSelected?: AIJavascriptComponentsOptions;
+  onOptionVariantSelected?: (optionSelected: AIJavascriptComponentsOptions) => void;
 }
 
 export const AIPromptArea = ({ 
@@ -72,7 +75,7 @@ export const AIPromptArea = ({
               disabled={disableComponents}
               onChange={(e) => {
                 const indexVariantSelected = optionVariants.indexOf(e.target.value);
-                const variantSelected = optionVariants[indexVariantSelected] as AIFrontendFrontendOptions;
+                const variantSelected = optionVariants[indexVariantSelected] as AIJavascriptComponentsOptions;
                 onOptionVariantSelected(variantSelected);
               }}
               
@@ -105,7 +108,9 @@ export const AIPromptArea = ({
               ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Frontend-Template.git'
               : optionSelected === 'Smart Contracts'
               ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Smart-Program-Template.git'
-              : '#'
+              : optionSelected === 'Server'
+              ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Server-Template.git'
+              : 'https://gitpod.io/new/#https://github.com/Vara-Lab/Frontend-Template.git'
             }
             target="_blank"
           >

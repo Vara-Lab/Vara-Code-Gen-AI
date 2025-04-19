@@ -2,7 +2,7 @@ import { AIOptionSelection } from './AIOptionSelection';
 import { AIPromptArea } from './AIPromptArea';
 import { AIResponse } from './AIResponse';
 import { useClipboard } from '@chakra-ui/react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@gear-js/vara-ui';
 import { 
   sendFrontendGaslessQuestion,
@@ -10,13 +10,14 @@ import {
   sendFrontendSailsCallsQuestion,
   sendFrontendSailsjsQuestion,
   sendFrontendWalletconnectQuestion,
+  sendFrontendGearjsQuestion,
   sendContractQuestion, 
   sendServerQuestion
 } from '../api/agent_calls';
 import { useAlert } from '@gear-js/react-hooks';
 import type { 
   AIPromptOptions,
-  AIFrontendFrontendOptions,
+  AIJavascriptComponentsOptions,
 } from '../models/ai_options';
 import styles from '../styles/ai_section.module.scss';
 
@@ -29,7 +30,13 @@ interface ResponseTitles {
 interface Data {
   responseTitle: string | [string,string];
   optionSelected: AIPromptOptions;
-  frontendOptionSelected: AIFrontendFrontendOptions;
+  frontendOptionSelected: AIJavascriptComponentsOptions;
+}
+
+interface AIJavascriptComponents {
+  optionFrontendVariantSelected: AIJavascriptComponentsOptions;
+  optionAbstractionVariantSelected: AIJavascriptComponentsOptions;
+  frontendVariantSelected: boolean;
 }
 
 const options = ['Frontend', 'Smart Contracts', 'Server', 'Web3 abstraction'];
@@ -39,19 +46,31 @@ const responseTitles: ResponseTitles = {
   'Server': ['SCRIPT', 'CLIENT'], 
   'Web3 abstraction': 'ABSTRACTION'
 }
-const AIFrontendFrontendOptions = [
+const AIFrontendComponentsOptions = [
   'SailsCalls',
+  'Sailsjs',
+  'WalletConnect',
+  'Gearjs',
+];
+
+const AIAbstractionComponentsOptions = [
   'GasLess',
   'Signless',
-  'Sailsjs',
-  'WalletConnect'
 ];
  
 export const AISection = () => {
   const [prompts, setPrompts] = useState(['', '', '', '']);
   const [waitingForAgent, setWaitingForAgent] = useState(false);
   const [optionSelected, setOptionSelected] = useState<AIPromptOptions>('Frontend');
-  const [optionFrontendVariantSelected, setOptionFrontendVariantSelected] = useState<AIFrontendFrontendOptions>('SailsCalls');
+
+
+
+  const [javascriptComponentSelected, setJavascriptComponentSelected] = useState<AIJavascriptComponents>({
+    optionFrontendVariantSelected: 'SailsCalls',
+    optionAbstractionVariantSelected: 'GasLess',
+    frontendVariantSelected: true
+  });
+
   const [aiResponseTitle, setAIResponseTitle] = useState(responseTitles[optionSelected]);
   const [codes, setCodes] = useState<[AgentCode, AgentCode]>([null, null]);
   const [firstOptionSelected, setFirstOptionSelected] = useState(false); 
@@ -68,9 +87,6 @@ export const AISection = () => {
     dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect'
       ? codes[0] as string
       : codes[firstOptionSelected ? 0 : 1] as string
-    // dataToUse.optionSelected === 'Smart Contracts'
-    //   ? codes[!firstOptionSelected ? 0 : 1]
-    //   : codes[0]
   );
 
   const handleOnSubmitPrompt = async (prompt: string, idl: string | null = '') => {
@@ -80,10 +96,14 @@ export const AISection = () => {
       return;
     }
 
+    const optionJavascriptSelected = javascriptComponentSelected.frontendVariantSelected
+      ? javascriptComponentSelected.optionFrontendVariantSelected
+      : javascriptComponentSelected.optionAbstractionVariantSelected;
+
     setDataToUse({
       responseTitle: aiResponseTitle,
       optionSelected,
-      frontendOptionSelected: optionFrontendVariantSelected
+      frontendOptionSelected: optionJavascriptSelected  // optionFrontendVariantSelected
     });
     setWaitingForAgent(true);
     setCodes([null, null]);
@@ -93,6 +113,8 @@ export const AISection = () => {
     try {
       switch (optionSelected) {
         case 'Frontend':
+          const { optionFrontendVariantSelected } = javascriptComponentSelected;
+
           if (optionFrontendVariantSelected === 'WalletConnect') {
             console.log('Sending frontend WalletConnect question ...');
             codes = [await sendFrontendWalletconnectQuestion(prompt), null];
@@ -110,17 +132,13 @@ export const AISection = () => {
               console.log('Sending frontend SailsCalls question ...');
               codes = await sendFrontendSailsCallsQuestion(prompt, idl);
               break;
-            case 'GasLess':
-              console.log('Sending frontend GasLess question ...');
-              codes = await sendFrontendGaslessQuestion(prompt, idl);
-              break;
-            case 'Signless':
-              console.log('Sending frontend Signless question ...');
-              codes = await sendFrontendSignlessQuestion(prompt, idl);
-              break;
             case 'Sailsjs':
               console.log('Sending frontend SailsJs question ...');
               codes = await sendFrontendSailsjsQuestion(prompt, idl);
+              break;
+            case 'Gearjs':
+              console.log('Sending frontend GearJs question ...');
+              codes = await sendFrontendGearjsQuestion(prompt, idl);
               break;
           }
           break;
@@ -134,11 +152,31 @@ export const AISection = () => {
             alert.error('the idl is missing');
             return;
           }
+          
           console.log('Sending server question ...');
           codes = await sendServerQuestion(prompt, idl);
-          break;
+          break;        
         case 'Web3 abstraction': 
-          console.log('sending web3 abstraction question');
+          if (!idl) {
+            setWaitingForAgent(false);
+            alert.error('the idl is missing');
+            return;
+          }
+
+          const { optionAbstractionVariantSelected } = javascriptComponentSelected;
+
+          // console.log('sending web3 abstraction question ...');
+
+          switch (optionAbstractionVariantSelected) {
+            case 'GasLess':
+              console.log('Sending Abstraction GasLess question ...');
+              codes = await sendFrontendGaslessQuestion(prompt, idl);
+              break;
+            case 'Signless':
+              console.log('Sending Abstraction Signless question ...');
+              codes = await sendFrontendSignlessQuestion(prompt, idl);
+              break;
+          }
           break;
         default:
           console.log('No option selected');
@@ -171,6 +209,22 @@ export const AISection = () => {
     setOptionSelected(id);  
   };
 
+  useEffect(() => {
+    if (optionSelected === 'Frontend') {
+      setJavascriptComponentSelected({
+        ...javascriptComponentSelected,
+        frontendVariantSelected: true,
+      });
+    }
+
+    if (optionSelected === 'Web3 abstraction') {
+      setJavascriptComponentSelected({
+        ...javascriptComponentSelected,
+        frontendVariantSelected: false,
+      });
+    }
+  }, [optionSelected]);
+
   return (
     <div
         className={styles.container}
@@ -186,12 +240,36 @@ export const AISection = () => {
           onPromptChange={handleOnPromptChange}
           defaultPrompt={prompts[options.indexOf(optionSelected)]}
           disableComponents={waitingForAgent}
-          optionVariants={optionSelected === 'Frontend' ? AIFrontendFrontendOptions : undefined}
-          optionVariantSelected={optionSelected === 'Frontend' ? optionFrontendVariantSelected : undefined}
+          optionVariants={ 
+            optionSelected === 'Frontend' 
+            ? AIFrontendComponentsOptions 
+            : optionSelected === 'Web3 abstraction'
+            ? AIAbstractionComponentsOptions
+            : undefined
+          }
+          optionVariantSelected={
+            // optionSelected === 'Frontend' ? optionFrontendVariantSelected : undefined
+            optionSelected === 'Frontend'
+            ? javascriptComponentSelected.optionFrontendVariantSelected
+            : optionSelected === 'Web3 abstraction'
+            ? javascriptComponentSelected.optionAbstractionVariantSelected
+            : undefined
+          }
           optionSelected={optionSelected}
-          onOptionVariantSelected = {optionSelected === 'Frontend' 
+          onOptionVariantSelected = {optionSelected === 'Frontend' || optionSelected === 'Web3 abstraction'
             ? (optionSelected) => {
-                setOptionFrontendVariantSelected(optionSelected);
+                // setOptionFrontendVariantSelected(optionSelected);
+                if (javascriptComponentSelected.frontendVariantSelected) {
+                  setJavascriptComponentSelected({
+                    ...javascriptComponentSelected,
+                    optionFrontendVariantSelected: optionSelected as AIJavascriptComponentsOptions
+                  });
+                } else {
+                  setJavascriptComponentSelected({
+                    ...javascriptComponentSelected,
+                    optionAbstractionVariantSelected: optionSelected as AIJavascriptComponentsOptions
+                  });
+                }
               }
             : undefined
           }
@@ -213,10 +291,8 @@ export const AISection = () => {
               cornerLeftButtons={
                 <>
                   {
-                    // ((dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected !== 'WalletConnect')  || dataToUse.optionSelected === 'Server') && (
                     (!(dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect')) && (<>
                       <Button
-                        // text={ firstOptionSelected ? (dataToUse.optionSelected === 'Server' ? 'Script' : 'Component') : 'Client' }
                         text={
                           dataToUse.optionSelected === 'Smart Contracts'
                           ? 'service'
@@ -230,7 +306,6 @@ export const AISection = () => {
                         }}
                       />
                       <Button
-                        // text={ firstOptionSelected ? (dataToUse.optionSelected === 'Server' ? 'Script' : 'Component') : 'Client' }
                         text={
                           dataToUse.optionSelected === 'Frontend'
                           ? 'Component'
@@ -268,26 +343,5 @@ export const AISection = () => {
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
