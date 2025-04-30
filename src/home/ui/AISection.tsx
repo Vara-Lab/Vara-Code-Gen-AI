@@ -11,6 +11,7 @@ import {
   sendFrontendSailsjsQuestion,
   sendFrontendWalletconnectQuestion,
   sendFrontendGearjsQuestion,
+  sendFrontendGearHooksQuestion,
   sendContractQuestion, 
   sendServerQuestion
 } from '../api/agent_calls';
@@ -19,6 +20,7 @@ import type {
   AIPromptOptions,
   AIJavascriptComponentsOptions,
 } from '../models/ai_options';
+import { VoiceRecorderButton } from './VoiceRecording';
 import styles from '../styles/ai_section.module.scss';
 
 type AgentCode = string | null;
@@ -47,10 +49,11 @@ const responseTitles: ResponseTitles = {
   'Web3 abstraction': 'ABSTRACTION'
 }
 const AIFrontendComponentsOptions = [
-  'SailsCalls',
-  'Sailsjs',
-  'WalletConnect',
   'Gearjs',
+  'Sailsjs',
+  'GearHooks',
+  'WalletConnect',
+  'SailsCalls',
 ];
 
 const AIAbstractionComponentsOptions = [
@@ -66,7 +69,7 @@ export const AISection = () => {
 
 
   const [javascriptComponentSelected, setJavascriptComponentSelected] = useState<AIJavascriptComponents>({
-    optionFrontendVariantSelected: 'SailsCalls',
+    optionFrontendVariantSelected: 'Gearjs',
     optionAbstractionVariantSelected: 'GasLess',
     frontendVariantSelected: true
   });
@@ -77,12 +80,11 @@ export const AISection = () => {
   const [dataToUse, setDataToUse] = useState<Data>({ 
     responseTitle: '',
     optionSelected: 'Frontend',
-    frontendOptionSelected: 'SailsCalls'
+    frontendOptionSelected: 'Gearjs'
   });
 
   const alert = useAlert();
 
-  // [TODO]: add this section has a bug, solve it to copy the correct code
   const { hasCopied, onCopy } = useClipboard(
     dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect'
       ? codes[0] as string
@@ -121,6 +123,12 @@ export const AISection = () => {
             break;
           }
 
+          if (optionFrontendVariantSelected === 'Gearjs') {
+            console.log('Sending frontend Gearjs question ...');
+            codes = [await sendFrontendGearjsQuestion(prompt), null];
+            break;
+          }
+
           if (!idl) {
             setWaitingForAgent(false);
             alert.error('the idl is missing');
@@ -136,9 +144,9 @@ export const AISection = () => {
               console.log('Sending frontend SailsJs question ...');
               codes = await sendFrontendSailsjsQuestion(prompt, idl);
               break;
-            case 'Gearjs':
-              console.log('Sending frontend GearJs question ...');
-              codes = await sendFrontendGearjsQuestion(prompt, idl);
+            case 'GearHooks':
+              console.log('Sending frontend Gear Hooks question ...');
+              codes = await sendFrontendGearHooksQuestion(prompt, idl);
               break;
           }
           break;
@@ -274,6 +282,11 @@ export const AISection = () => {
             : undefined
           }
         />
+
+        <VoiceRecorderButton 
+          onResult={handleOnPromptChange}
+        />
+
         {
           codes[0] && (
             <AIResponse
@@ -283,7 +296,7 @@ export const AISection = () => {
                 : 'Abstraction'
               }
               code={ 
-                (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect')
+                (dataToUse.optionSelected === 'Frontend' && (dataToUse.frontendOptionSelected === 'WalletConnect' || dataToUse.frontendOptionSelected === 'Gearjs'))
                   ? codes[0] as string
                   : codes[firstOptionSelected ? 0 : 1] as string
               }
@@ -291,7 +304,7 @@ export const AISection = () => {
               cornerLeftButtons={
                 <>
                   {
-                    (!(dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect')) && (<>
+                    (!(dataToUse.optionSelected === 'Frontend' && (dataToUse.frontendOptionSelected === 'WalletConnect' || dataToUse.frontendOptionSelected === 'Gearjs'))) && (<>
                       <Button
                         text={
                           dataToUse.optionSelected === 'Smart Contracts'

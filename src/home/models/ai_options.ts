@@ -4,4 +4,5 @@ export type AIJavascriptComponentsOptions = 'SailsCalls'
   | 'Signless'
   | 'Sailsjs'
   | 'WalletConnect'
-  | 'Gearjs';
+  | 'Gearjs'
+  | 'GearHooks';

@@ -4710,6 +4710,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dom-speech-recognition@npm:*":
+  version: 0.0.6
+  resolution: "@types/dom-speech-recognition@npm:0.0.6"
+  checksum: 2483e59689b62c5be1d5da5168ee49be933d91e6866d5f60978b31aaf1f254d921c67f4c795c14a90442b0f86d51496cec88d26c810cf6e3124db1880f798c13
+  languageName: node
+  linkType: hard
+
 "@types/eslint@npm:^8.4.5":
   version: 8.56.12
   resolution: "@types/eslint@npm:8.56.12"
@@ -4802,6 +4809,15 @@ __metadata:
   dependencies:
     "@types/react": "npm:*"
   checksum: 1f79a7708d038cd651bdb21e01a99c594761bc9a40a565abe98958e1d27facfeb6e9824ddf6ae3504e7a56568f0f3da2380fe52ac18477b5864d2d5cf1386a9e
+  languageName: node
+  linkType: hard
+
+"@types/react-speech-recognition@npm:3.9.6":
+  version: 3.9.6
+  resolution: "@types/react-speech-recognition@npm:3.9.6"
+  dependencies:
+    "@types/dom-speech-recognition": "npm:*"
+  checksum: d39d3fc44f2c5314f6d24864f7d8197271f6529640a46e33965c32ffd4aaba66359d4205a52960a675a07078c6b08ff479fc71ea208c22ec3262230b5fcc4dd6
   languageName: node
   linkType: hard
 
@@ -9553,6 +9569,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-speech-recognition@npm:4.0.1":
+  version: 4.0.1
+  resolution: "react-speech-recognition@npm:4.0.1"
+  dependencies:
+    lodash.debounce: "npm:^4.0.8"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 26c90913b34858aefae60df387d49c80556f52430bf61c3aa7f703794139a969b66fd4e8ba11c805dee0dfeff775eb085e2dcf7a0f46f45809d3a770c92171e4
+  languageName: node
+  linkType: hard
+
 "react-style-singleton@npm:^2.2.1, react-style-singleton@npm:^2.2.2, react-style-singleton@npm:^2.2.3":
   version: 2.2.3
   resolution: "react-style-singleton@npm:2.2.3"
@@ -10645,6 +10672,7 @@ __metadata:
     "@types/node": "npm:18.16.19"
     "@types/react": "npm:18.2.33"
     "@types/react-dom": "npm:18.2.14"
+    "@types/react-speech-recognition": "npm:3.9.6"
     "@types/react-syntax-highlighter": "npm:^15"
     "@vitejs/plugin-react-swc": "npm:3.3.2"
     autoprefixer: "npm:10.4.14"
@@ -10666,6 +10694,7 @@ __metadata:
     react-hook-form: "npm:7.51.5"
     react-icons: "npm:5.2.1"
     react-router-dom: "npm:6.22.2"
+    react-speech-recognition: "npm:4.0.1"
     react-syntax-highlighter: "npm:15.6.1"
     sails-js: "npm:0.3.1"
     sails-js-parser: "npm:0.3.1"

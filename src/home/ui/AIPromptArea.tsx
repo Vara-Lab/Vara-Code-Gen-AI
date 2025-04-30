@@ -36,7 +36,7 @@ export const AIPromptArea = ({
   defaultPrompt = '', 
   optionVariants,
   optionSelected = 'Frontend',
-  optionVariantSelected = 'SailsCalls',
+  optionVariantSelected = 'Gearjs',
   onOptionVariantSelected = () => {}
 }: Props) => {
   const fileRef = useRef<string | null>(null);
