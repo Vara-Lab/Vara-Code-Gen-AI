@@ -1,11 +1,66 @@
 import { AgentResponse } from "@/home/models/agent_call";
 import axios from "axios";
-import { resolve } from "path";
 
 const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const CONTRACT_SERVICE_URL = 'service_smartcontract_agent';
-// const CONTRACT_DEFI
 const CONTRACT_LIB_URL = 'lib_smartcontract_agent';
+const CONTRACT_OPTIMIZATION = 'optimization_smartcontract_agent';
+
+export const sendContractOptimizationQuestion = (question: string, currentContractCode: string, historyString: string): Promise<[string, string]> => {
+    return new Promise(async (resolve, reject) => {
+        const url_contract_service = API_URL + CONTRACT_OPTIMIZATION;
+
+        let response: AgentResponse | null = null;
+
+        const agentQuestion = `
+        current code: ${currentContractCode}\n
+        current prompt: ${question}\n\n
+        ${historyString}
+        `;
+
+        try {
+            const temp = await axios.post(
+                url_contract_service,
+                {
+                    question: agentQuestion
+                }
+            );
+
+            response = temp.data;
+        } catch (e) {
+            console.log(e);
+            const error_message = (e as Error).message;
+            reject(`Error: ${error_message}`);
+            return;
+        }
+
+        if (!response) {
+            reject('Not answer received');
+            return;
+        }
+
+        if ('error' in response) {
+            reject(`Error: ${response.error}`);
+            return;
+        }
+
+        if (!response.answer) {
+            reject('No response from server');
+            return;
+        }
+
+        if (typeof response.answer !== 'string') {
+            const serializedAnswer = JSON.stringify(response.answer, null, 2);
+            console.log("Unexpected format for data.answer:" + response.answer);
+            reject(serializedAnswer);
+            return;
+        }
+
+        const contractLib = await contract_lib(response.answer);
+
+        resolve([contractLib, response.answer.replace(/rust|```/g, "")]);
+    });
+}
 
 export const sendContractQuestion = (question: string): Promise<[string, string]> => {
     return new Promise(async (resolve, reject) => {
@@ -70,8 +125,9 @@ export const sendContractDefiQuestion = (question: string): Promise<String> => {
         const matches = response.answer.match(rustCodeRegex) || [];
 
         if (matches.length < 1) {
-            reject('Code provided by agent is not in rust language');
-            return;
+            console.log('Invalid code!!! creacion de defi')
+            // reject('Code provided by agent is not in rust language');
+            // return;
         }
 
         const extractedRustCode = response.answer
@@ -129,8 +185,9 @@ const contract_service = (question: string): Promise<string> => {
         const matches = response.answer.match(rustCodeRegex) || [];
 
         if (matches.length < 1) {
-            reject('Code provided by agent is not in rust language');
-            return;
+            // reject('Code provided by agent is not in rust language');
+            // return;
+            console.log('Invalid code!!! creacion de service')
         }
 
         const extractedRustCode = response.answer
@@ -188,8 +245,9 @@ const contract_lib = (contractService: String): Promise<string> => {
         const matches = response.answer.match(rustCodeRegex) || [];
 
         if (matches.length < 1) {
-            reject('Code provided by agent is not in rust language');
-            return;
+            console.log('Invalid code!!! creacion de lib')
+            // reject('Code provided by agent is not in rust language');
+            // return;
         }
 
         const extractedRustCode = response.answer

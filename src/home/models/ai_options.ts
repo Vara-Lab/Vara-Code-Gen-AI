@@ -1,8 +1,10 @@
 export type AIPromptOptions = 'Frontend' | 'Smart Contracts' | 'Server' | 'Web3 abstraction'
-export type AIJavascriptComponentsOptions = 'SailsCalls'
-  | 'GasLess'
-  | 'Signless'
+export type AIJavascriptComponentsOptions = 
   | 'Sailsjs'
-  | 'WalletConnect'
   | 'Gearjs'
-  | 'GearHooks';
+  | 'GearHooks'
+  // Web3 Abstraction options
+  | "GasLess/Frontend"
+  | "GasLess/Server"
+  | "GasLess/ez-transactions"
+  | "SignLess/ez-transactions"

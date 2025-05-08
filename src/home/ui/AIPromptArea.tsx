@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { 
   Button,
+  Checkbox,
   Select,
 } from "@gear-js/vara-ui";
 import { Textarea } from "@chakra-ui/react";
@@ -15,6 +16,7 @@ import type {
   AIJavascriptComponentsOptions, 
   AIPromptOptions 
 } from "../models/ai_options";
+import { useAlert } from "@gear-js/react-hooks";
 import styles from '../styles/ai_prompt_area.module.scss';
 import clsx from "clsx";
 
@@ -27,6 +29,9 @@ interface Props {
   optionSelected?: AIPromptOptions;
   optionVariantSelected?: AIJavascriptComponentsOptions;
   onOptionVariantSelected?: (optionSelected: AIJavascriptComponentsOptions) => void;
+  isContractQuestion?: boolean;
+  contractOptimizationChecked?: boolean;
+  onContractOptimizationChange?: (isChecked: boolean) => void;
 }
 
 export const AIPromptArea = ({ 
@@ -37,11 +42,15 @@ export const AIPromptArea = ({
   optionVariants,
   optionSelected = 'Frontend',
   optionVariantSelected = 'Gearjs',
-  onOptionVariantSelected = () => {}
+  onOptionVariantSelected = () => {},
+  isContractQuestion = false,
+  contractOptimizationChecked = false,
+  onContractOptimizationChange = () => {},
 }: Props) => {
   const fileRef = useRef<string | null>(null);
   const [promptText, setPromptText] = useState(defaultPrompt);
   const [idlName, setIdlName] = useState<string | null>(null);
+  const alert = useAlert();
 
   const handleSubmitIDL = (fileContent: string, fileName: string) => {
     fileRef.current = fileContent;
@@ -50,6 +59,13 @@ export const AIPromptArea = ({
 
   const handlePromptText = (e:  React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
+
+    if (value.length > 1000) {
+      alert.error('Prompt is too long');
+      console.log('Prompt is too long');
+      return;
+    }
+
     setPromptText(value);
 
     if (onPromptChange) onPromptChange(value);
@@ -90,6 +106,18 @@ export const AIPromptArea = ({
               }
             />
           }
+          {
+            isContractQuestion && (
+              <Checkbox
+                // isChecked={optionSelected === 'Smart Contracts'}
+                label="optimize"
+                checked={contractOptimizationChecked}
+                onChange={(e) => {
+                  onContractOptimizationChange(e.target.checked);
+                }}
+              />
+            )
+          }
           <Button 
             text="Generate"
             size="x-large"
@@ -105,12 +133,17 @@ export const AIPromptArea = ({
           <a 
             href={
               optionSelected === 'Frontend'
-              ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Frontend-Template.git'
+              ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/dapp-template.git'
               : optionSelected === 'Smart Contracts'
               ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Smart-Program-Template.git'
               : optionSelected === 'Server'
               ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/Server-Template.git'
-              : 'https://gitpod.io/new/#https://github.com/Vara-Lab/Frontend-Template.git'
+              : (
+                  (optionSelected === 'Web3 abstraction' && optionVariantSelected === 'GasLess/ez-transactions') ||
+                  (optionSelected === 'Web3 abstraction' && optionVariantSelected === 'SignLess/ez-transactions')
+                )
+              ? 'https://gitpod.io/new/#https://github.com/Vara-Lab/ez-dApp-Template.git'
+              : 'https://gitpod.io/new/#https://github.com/Vara-Lab/dapp-template.git' 
             }
             target="_blank"
           >

@@ -13,6 +13,7 @@ import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import { useAlert } from "@gear-js/react-hooks";
 
 interface VoiceRecorderButtonProps {
   onResult: (text: string) => void;
@@ -40,6 +41,7 @@ function VoiceRecorderButton({ onResult }: VoiceRecorderButtonProps) {
     resetTranscript,
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
+  const gearAlert = useAlert();
 
   const [selectedLanguage, setSelectedLanguage] = useState("auto");
 
@@ -49,6 +51,16 @@ function VoiceRecorderButton({ onResult }: VoiceRecorderButtonProps) {
       resetTranscript();
     }
   }, [listening]);
+
+  useEffect(() => {
+    if (listening && transcript.length > 1000) {
+      console.log("Transcript too long, stopping...");
+      gearAlert.error("Transcript is too long, stopping...");
+      SpeechRecognition.stopListening();
+      onResult(transcript);
+      resetTranscript();
+    }
+  }, [transcript, listening]);
 
   const getEffectiveLanguage = () => {
     return selectedLanguage === "auto" ? getBrowserLanguage() : selectedLanguage;
@@ -146,6 +158,7 @@ function VoiceRecorderButton({ onResult }: VoiceRecorderButtonProps) {
           <Text fontSize="sm" color="green.300" fontWeight="semibold" mb={1}>
             🎙️ Voice Input Active
           </Text>
+
           <Text
             fontSize="sm"
             color="whiteAlpha.900"

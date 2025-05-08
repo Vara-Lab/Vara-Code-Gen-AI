@@ -5,15 +5,16 @@ import { useClipboard } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@gear-js/vara-ui';
 import { 
-  sendFrontendGaslessQuestion,
-  sendFrontendSignlessQuestion,
-  sendFrontendSailsCallsQuestion,
+  sendWeb3AbstractionGasLessFrontendQuestion,
+  sendWeb3AbstractionSignlessEzTransactionsQuestion,
+  sendWeb3AbstractionGasLessServerQuestion,
+  sendWeb3AbstractionGasLessEzTransactionsQuestion,
   sendFrontendSailsjsQuestion,
-  sendFrontendWalletconnectQuestion,
   sendFrontendGearjsQuestion,
   sendFrontendGearHooksQuestion,
+  sendContractOptimizationQuestion,
   sendContractQuestion, 
-  sendServerQuestion
+  sendServerQuestion,
 } from '../api/agent_calls';
 import { useAlert } from '@gear-js/react-hooks';
 import type { 
@@ -21,6 +22,7 @@ import type {
   AIJavascriptComponentsOptions,
 } from '../models/ai_options';
 import { VoiceRecorderButton } from './VoiceRecording';
+import { AgentResponse } from '../models/agent_question';
 import styles from '../styles/ai_section.module.scss';
 
 type AgentCode = string | null;
@@ -43,22 +45,24 @@ interface AIJavascriptComponents {
 
 const options = ['Frontend', 'Smart Contracts', 'Server', 'Web3 abstraction'];
 const responseTitles: ResponseTitles = {
-  'Frontend': ['REACT COMPONENT', 'CLIENT'],
+  'Frontend': ['REACT COMPONENT', 'LIB'],
   'Smart Contracts': ['LIB.RS', 'SERVICE'],
-  'Server': ['SCRIPT', 'CLIENT'], 
+  'Server': ['SCRIPT', 'LIB'], 
   'Web3 abstraction': 'ABSTRACTION'
 }
 const AIFrontendComponentsOptions = [
   'Gearjs',
   'Sailsjs',
   'GearHooks',
-  'WalletConnect',
-  'SailsCalls',
+  // 'WalletConnect',
+  // 'SailsCalls',
 ];
 
 const AIAbstractionComponentsOptions = [
-  'GasLess',
-  'Signless',
+  "GasLess/Frontend",
+  "GasLess/Server",
+  "GasLess/ez-transactions",
+  "SignLess/ez-transactions"
 ];
  
 export const AISection = () => {
@@ -66,11 +70,9 @@ export const AISection = () => {
   const [waitingForAgent, setWaitingForAgent] = useState(false);
   const [optionSelected, setOptionSelected] = useState<AIPromptOptions>('Frontend');
 
-
-
   const [javascriptComponentSelected, setJavascriptComponentSelected] = useState<AIJavascriptComponents>({
     optionFrontendVariantSelected: 'Gearjs',
-    optionAbstractionVariantSelected: 'GasLess',
+    optionAbstractionVariantSelected: 'GasLess/Frontend',
     frontendVariantSelected: true
   });
 
@@ -83,10 +85,25 @@ export const AISection = () => {
     frontendOptionSelected: 'Gearjs'
   });
 
+  const [contractHistory, setContractHistory] = useState<AgentResponse[]>([]);
+  // const contractOptimizationSet = useRef(false);
+  const [contractOptimizationSelected, setContractOptimizationSelected] = useState(false);
+  const currentContractCode = useRef<{lib: string, service: string}>({
+    lib: '',
+    service: ''
+  });
+
   const alert = useAlert();
 
   const { hasCopied, onCopy } = useClipboard(
-    dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'WalletConnect'
+    (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
+    (
+      dataToUse.optionSelected === 'Web3 abstraction' && (
+        dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
+        dataToUse.frontendOptionSelected === 'GasLess/Server' ||
+        dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
+      )
+    )
       ? codes[0] as string
       : codes[firstOptionSelected ? 0 : 1] as string
   );
@@ -117,12 +134,6 @@ export const AISection = () => {
         case 'Frontend':
           const { optionFrontendVariantSelected } = javascriptComponentSelected;
 
-          if (optionFrontendVariantSelected === 'WalletConnect') {
-            console.log('Sending frontend WalletConnect question ...');
-            codes = [await sendFrontendWalletconnectQuestion(prompt), null];
-            break;
-          }
-
           if (optionFrontendVariantSelected === 'Gearjs') {
             console.log('Sending frontend Gearjs question ...');
             codes = [await sendFrontendGearjsQuestion(prompt), null];
@@ -136,10 +147,6 @@ export const AISection = () => {
           }
 
           switch (optionFrontendVariantSelected) {
-            case 'SailsCalls':
-              console.log('Sending frontend SailsCalls question ...');
-              codes = await sendFrontendSailsCallsQuestion(prompt, idl);
-              break;
             case 'Sailsjs':
               console.log('Sending frontend SailsJs question ...');
               codes = await sendFrontendSailsjsQuestion(prompt, idl);
@@ -151,8 +158,50 @@ export const AISection = () => {
           }
           break;
         case 'Smart Contracts':
-          console.log('Sendind contract question ...')
+          console.log('Sendind contract question ...');
+
+          if (contractHistory.length > 8) {
+            alert.error('cant be optimized further');
+            setWaitingForAgent(false);
+            setContractOptimizationSelected(false);
+            setCodes([
+              currentContractCode.current.lib,
+              currentContractCode.current.service
+            ])
+            return;
+          }
+          
+          if (contractOptimizationSelected && contractHistory.length > 0 && contractHistory.length < 9) {
+            const contractCode = `
+            ${currentContractCode.current.lib}\n
+            ${currentContractCode.current.service}
+            `;
+            
+            codes = await sendContractOptimizationQuestion(
+              prompt,
+              contractCode,
+              formatContractHistory()
+            );
+
+            setContractHistory([
+              ...contractHistory,
+              {
+                userPrompt: prompt,
+                agentResponse: `${codes[0]}\n${codes[1]}`,
+              }
+            ]);
+
+            currentContractCode.current.lib = codes[0] as string;
+            currentContractCode.current.service = codes[1] as string;
+
+            break;
+          }
+
           codes = await sendContractQuestion(prompt);
+          setContractHistory([{
+            userPrompt: prompt,
+            agentResponse: `${codes[0]}\n${codes[1]}`,
+          }]);
           break;
         case 'Server':
           if (!idl) {
@@ -165,35 +214,44 @@ export const AISection = () => {
           codes = await sendServerQuestion(prompt, idl);
           break;        
         case 'Web3 abstraction': 
-          if (!idl) {
-            setWaitingForAgent(false);
-            alert.error('the idl is missing');
-            return;
+          const { optionAbstractionVariantSelected } = javascriptComponentSelected;
+          
+          if (optionAbstractionVariantSelected === 'SignLess/ez-transactions') {
+            if (!idl) {
+              setWaitingForAgent(false);
+              alert.error('the idl is missing');
+              return;
+            }
+
+            console.log('sending web3 abstraction question ...');
+
+            codes = await sendWeb3AbstractionSignlessEzTransactionsQuestion(prompt, idl);
+            break;
           }
 
-          const { optionAbstractionVariantSelected } = javascriptComponentSelected;
 
-          // console.log('sending web3 abstraction question ...');
+          console.log('sending web3 abstraction question ...');
 
           switch (optionAbstractionVariantSelected) {
-            case 'GasLess':
-              console.log('Sending Abstraction GasLess question ...');
-              codes = await sendFrontendGaslessQuestion(prompt, idl);
+            case 'GasLess/Frontend':
+              codes = [await sendWeb3AbstractionGasLessFrontendQuestion(prompt), null];
               break;
-            case 'Signless':
-              console.log('Sending Abstraction Signless question ...');
-              codes = await sendFrontendSignlessQuestion(prompt, idl);
+            case 'GasLess/Server':
+              codes = [await sendWeb3AbstractionGasLessServerQuestion(prompt), null];
+              break;
+            case 'GasLess/ez-transactions':
+              codes = [await sendWeb3AbstractionGasLessFrontendQuestion(prompt), null];
               break;
           }
+
           break;
         default:
-          console.log('No option selected');
-          // [TODO]: set an alert for this option
+          alert.error('No option selected');
       }
     } catch(e) {
-      // [TODO]: add a warning if any error occurs
       const error = (e as Error).message;
       console.log(error);
+      alert.error(error);
       setWaitingForAgent(false);
       return;
     }
@@ -216,6 +274,16 @@ export const AISection = () => {
     setAIResponseTitle(title);
     setOptionSelected(id);  
   };
+
+  const formatContractHistory = (): string => {
+    let history = 'History:';
+
+    contractHistory.forEach(item => {
+      history += `\n\nuser: ${item.userPrompt}\nassistant: ${item.agentResponse}`;
+    });
+
+    return history;
+  }
 
   useEffect(() => {
     if (optionSelected === 'Frontend') {
@@ -281,6 +349,11 @@ export const AISection = () => {
               }
             : undefined
           }
+          isContractQuestion={optionSelected === 'Smart Contracts'}
+          contractOptimizationChecked={contractOptimizationSelected}
+          onContractOptimizationChange={checked => {
+            setContractOptimizationSelected(checked);
+          }}
         />
 
         <VoiceRecorderButton 
@@ -296,7 +369,11 @@ export const AISection = () => {
                 : 'Abstraction'
               }
               code={ 
-                (dataToUse.optionSelected === 'Frontend' && (dataToUse.frontendOptionSelected === 'WalletConnect' || dataToUse.frontendOptionSelected === 'Gearjs'))
+                (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
+                (dataToUse.optionSelected === 'Web3 abstraction' && (
+                  dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
+                  dataToUse.frontendOptionSelected === 'GasLess/Server' ||
+                  dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'))
                   ? codes[0] as string
                   : codes[firstOptionSelected ? 0 : 1] as string
               }
@@ -304,38 +381,47 @@ export const AISection = () => {
               cornerLeftButtons={
                 <>
                   {
-                    (!(dataToUse.optionSelected === 'Frontend' && (dataToUse.frontendOptionSelected === 'WalletConnect' || dataToUse.frontendOptionSelected === 'Gearjs'))) && (<>
-                      <Button
-                        text={
-                          dataToUse.optionSelected === 'Smart Contracts'
-                          ? 'service'
-                          : 'client'
-                        }
-                        size="x-large"
-                        color={ !firstOptionSelected ? 'primary' : 'contrast' }
-                        className={styles.button}
-                        onClick={() => {
-                          setFirstOptionSelected(false);
-                        }}
-                      />
-                      <Button
-                        text={
-                          dataToUse.optionSelected === 'Frontend'
-                          ? 'Component'
-                          : dataToUse.optionSelected === 'Server'
-                          ? 'Script'
-                          : dataToUse.optionSelected === 'Smart Contracts'
-                          ? 'lib.rs'
-                          : 'Abstraction'
-                        }
-                        size="x-large"
-                        // color='contrast'
-                        color={ firstOptionSelected ? 'primary' : 'contrast' }
-                        className={styles.button}
-                        onClick={() => {
-                          setFirstOptionSelected(true);
-                        }}
-                      />
+                    (
+                      !(
+                        (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
+                        (dataToUse.optionSelected === 'Web3 abstraction' && (
+                          dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
+                          dataToUse.frontendOptionSelected === 'GasLess/Server' ||
+                          dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'))
+                      )
+                    ) && (
+                      <>
+                        <Button
+                          text={
+                            dataToUse.optionSelected === 'Smart Contracts'
+                            ? 'service'
+                            : 'lib'
+                          }
+                          size="x-large"
+                          color={ !firstOptionSelected ? 'primary' : 'contrast' }
+                          className={styles.button}
+                          onClick={() => {
+                            setFirstOptionSelected(false);
+                          }}
+                        />
+                        <Button
+                          text={
+                            dataToUse.optionSelected === 'Frontend'
+                            ? 'Component'
+                            : dataToUse.optionSelected === 'Server'
+                            ? 'Script'
+                            : dataToUse.optionSelected === 'Smart Contracts'
+                            ? 'lib.rs'
+                            : 'Abstraction'
+                          }
+                          size="x-large"
+                          // color='contrast'
+                          color={ firstOptionSelected ? 'primary' : 'contrast' }
+                          className={styles.button}
+                          onClick={() => {
+                            setFirstOptionSelected(true);
+                          }}
+                        />
                       </>
                     )
                   }
