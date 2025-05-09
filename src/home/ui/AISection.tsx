@@ -59,7 +59,7 @@ const AIFrontendComponentsOptions = [
 ];
 
 const AIAbstractionComponentsOptions = [
-  "GasLess/Frontend",
+  // "GasLess/Frontend",
   "GasLess/Server",
   "GasLess/ez-transactions",
   "SignLess/ez-transactions"
@@ -72,7 +72,8 @@ export const AISection = () => {
 
   const [javascriptComponentSelected, setJavascriptComponentSelected] = useState<AIJavascriptComponents>({
     optionFrontendVariantSelected: 'Gearjs',
-    optionAbstractionVariantSelected: 'GasLess/Frontend',
+    // optionAbstractionVariantSelected: 'GasLess/Frontend',
+    optionAbstractionVariantSelected: 'GasLess/Server',
     frontendVariantSelected: true
   });
 
@@ -167,7 +168,7 @@ export const AISection = () => {
             setCodes([
               currentContractCode.current.lib,
               currentContractCode.current.service
-            ])
+            ]);
             return;
           }
           
@@ -177,7 +178,7 @@ export const AISection = () => {
             ${currentContractCode.current.lib}\n
             ${currentContractCode.current.service}
             `;
-            
+
             codes = await sendContractOptimizationQuestion(
               prompt,
               contractCode,
@@ -365,6 +366,18 @@ export const AISection = () => {
         {
           codes[0] && (
             <AIResponse
+              onCodeChange={newCode => {
+                if (optionSelected === 'Smart Contracts') {
+                  if (firstOptionSelected) {
+                    currentContractCode.current.lib = newCode;
+                    setCodes([newCode, codes[1]]);
+                  } else {
+                    currentContractCode.current.service = newCode;
+                    setCodes([codes[0], newCode]);
+                  }
+                }
+              }}
+              editable={optionSelected === 'Smart Contracts'}
               responseTitle={
                 dataToUse.optionSelected !== 'Web3 abstraction'
                 ? dataToUse.responseTitle[ firstOptionSelected ? 0 : 1 ]
