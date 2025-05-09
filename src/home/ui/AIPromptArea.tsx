@@ -21,7 +21,7 @@ import styles from '../styles/ai_prompt_area.module.scss';
 import clsx from "clsx";
 
 interface Props {
-  onSubmitPrompt: (prompt: string, idl: string | null) => void;
+  onSubmitPrompt: (prompt: string, idl: string | null, updateContract?: boolean) => void;
   onPromptChange?: (prompt: string) => void;
   disableComponents?: boolean;
   defaultPrompt?: string;
@@ -29,9 +29,9 @@ interface Props {
   optionSelected?: AIPromptOptions;
   optionVariantSelected?: AIJavascriptComponentsOptions;
   onOptionVariantSelected?: (optionSelected: AIJavascriptComponentsOptions) => void;
-  isContractQuestion?: boolean;
-  contractOptimizationChecked?: boolean;
-  onContractOptimizationChange?: (isChecked: boolean) => void;
+  // isContractQuestion?: boolean;
+  updateContractButtonEnable?: boolean;
+  onUpdateContractButtonPressed?: () => void;
 }
 
 export const AIPromptArea = ({ 
@@ -43,9 +43,9 @@ export const AIPromptArea = ({
   optionSelected = 'Frontend',
   optionVariantSelected = 'Gearjs',
   onOptionVariantSelected = () => {},
-  isContractQuestion = false,
-  contractOptimizationChecked = false,
-  onContractOptimizationChange = () => {},
+  // isContractQuestion = false,
+  updateContractButtonEnable = false,
+  onUpdateContractButtonPressed = () => {},
 }: Props) => {
   const fileRef = useRef<string | null>(null);
   const [promptText, setPromptText] = useState(defaultPrompt);
@@ -69,6 +69,10 @@ export const AIPromptArea = ({
     setPromptText(value);
 
     if (onPromptChange) onPromptChange(value);
+  }
+
+  const handleOnUpdateContract = () => {
+    onSubmitPrompt(promptText, fileRef.current, true);
   }
 
   const handleOnSubmitPrompt = () => {
@@ -107,14 +111,18 @@ export const AIPromptArea = ({
             />
           }
           {
-            isContractQuestion && (
-              <Checkbox
-                // isChecked={optionSelected === 'Smart Contracts'}
-                label="optimize"
-                checked={contractOptimizationChecked}
-                onChange={(e) => {
-                  onContractOptimizationChange(e.target.checked);
-                }}
+            updateContractButtonEnable && (
+              <Button 
+                text="Update"
+                size="x-large"
+                isLoading={disableComponents}
+                onClick={handleOnUpdateContract}
+                className={
+                  clsx(
+                    styles.button,
+                    styles.buttonGreen
+                  )
+                }
               />
             )
           }

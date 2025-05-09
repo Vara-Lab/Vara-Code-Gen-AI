@@ -51,7 +51,7 @@ export const sendWeb3AbstractionGasLessFrontendQuestion = (question: string): Pr
     });
 };
 
-export const sendWeb3AbstractionGasLessServerQuestion = (question: string): Promise<string> => {
+export const sendWeb3AbstractionGasLessServerQuestion = (question: string): Promise<[string, string]> => {
     const url = API_URL + WEB3ABSTRACTION_GASLESS_SERVER;
     let response: AgentResponse | null = null;
     let client_code: string;
@@ -64,7 +64,7 @@ export const sendWeb3AbstractionGasLessServerQuestion = (question: string): Prom
                     question
                 }
             );
-
+            client_code = await client_idl_code(question);
             response = temp.data;
         } catch(e) {
             console.log(e);
@@ -90,7 +90,7 @@ export const sendWeb3AbstractionGasLessServerQuestion = (question: string): Prom
 
         const gaslessComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
 
-        resolve(gaslessComponent); 
+        resolve([gaslessComponent, client_code]); 
     });
 };
 

@@ -108,7 +108,7 @@ export const AISection = () => {
       : codes[firstOptionSelected ? 0 : 1] as string
   );
 
-  const handleOnSubmitPrompt = async (prompt: string, idl: string | null = '') => {
+  const handleOnSubmitPrompt = async (prompt: string, idl: string | null = '', updateContract = false) => {
     if (prompt.length == 0) {
       console.error('prompt cant be empty');
       alert.error('Prompt cant be empty')
@@ -171,7 +171,8 @@ export const AISection = () => {
             return;
           }
           
-          if (contractOptimizationSelected && contractHistory.length > 0 && contractHistory.length < 9) {
+          // if (contractOptimizationSelected && contractHistory.length > 0 && contractHistory.length < 9) {
+          if (updateContract && contractHistory.length > 0 && contractHistory.length < 9) {
             const contractCode = `
             ${currentContractCode.current.lib}\n
             ${currentContractCode.current.service}
@@ -196,7 +197,6 @@ export const AISection = () => {
 
             break;
           }
-
           codes = await sendContractQuestion(prompt);
           setContractHistory([{
             userPrompt: prompt,
@@ -237,10 +237,10 @@ export const AISection = () => {
               codes = [await sendWeb3AbstractionGasLessFrontendQuestion(prompt), null];
               break;
             case 'GasLess/Server':
-              codes = [await sendWeb3AbstractionGasLessServerQuestion(prompt), null];
+              codes = await sendWeb3AbstractionGasLessServerQuestion(prompt);
               break;
             case 'GasLess/ez-transactions':
-              codes = [await sendWeb3AbstractionGasLessFrontendQuestion(prompt), null];
+              codes = [await sendWeb3AbstractionGasLessEzTransactionsQuestion(prompt), null];
               break;
           }
 
@@ -349,11 +349,13 @@ export const AISection = () => {
               }
             : undefined
           }
-          isContractQuestion={optionSelected === 'Smart Contracts'}
-          contractOptimizationChecked={contractOptimizationSelected}
-          onContractOptimizationChange={checked => {
-            setContractOptimizationSelected(checked);
-          }}
+          // isContractQuestion={optionSelected === 'Smart Contracts'}
+          
+          updateContractButtonEnable={optionSelected === 'Smart Contracts' && contractHistory.length > 0}
+          onUpdateContractButtonPressed={() => {}}
+          // onContractOptimizationChange={checked => {
+          //   setContractOptimizationSelected(checked);
+          // }}
         />
 
         <VoiceRecorderButton 
@@ -372,8 +374,9 @@ export const AISection = () => {
                 (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
                 (dataToUse.optionSelected === 'Web3 abstraction' && (
                   dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
-                  dataToUse.frontendOptionSelected === 'GasLess/Server' ||
-                  dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'))
+                  // dataToUse.frontendOptionSelected === 'GasLess/Server' ||
+                  dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
+                ))
                   ? codes[0] as string
                   : codes[firstOptionSelected ? 0 : 1] as string
               }
@@ -386,7 +389,7 @@ export const AISection = () => {
                         (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
                         (dataToUse.optionSelected === 'Web3 abstraction' && (
                           dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
-                          dataToUse.frontendOptionSelected === 'GasLess/Server' ||
+                          // dataToUse.frontendOptionSelected === 'GasLess/Server' ||
                           dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'))
                       )
                     ) && (
