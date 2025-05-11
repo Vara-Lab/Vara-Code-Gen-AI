@@ -5,13 +5,11 @@ import axios from "axios";
 const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const SERVER_SCRIPT_URL = 'script_server_agent';
 
-export const sendServerQuestion = (question: string, idl: string): Promise<[string, string]> => {
+export const sendServerQuestion = (question: string, idl: string): Promise<string> => {
     return new Promise(async (resolve, reject) => {
-        let client_code: string;
         let script_code: string;
 
         try {
-            client_code = await client_idl_code(idl);
             script_code = await server_script_code(question, idl);
         } catch(e) {
             console.log(e);
@@ -20,7 +18,7 @@ export const sendServerQuestion = (question: string, idl: string): Promise<[stri
             return;
         }
 
-        resolve([script_code, client_code]);
+        resolve(script_code);
     });
 }
 

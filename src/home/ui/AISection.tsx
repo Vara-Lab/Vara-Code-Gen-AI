@@ -2,7 +2,7 @@ import { AIOptionSelection } from './AIOptionSelection';
 import { AIPromptArea } from './AIPromptArea';
 import { AIResponse } from './AIResponse';
 import { useClipboard } from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Button } from '@gear-js/vara-ui';
 import { 
   sendWeb3AbstractionGasLessFrontendQuestion,
@@ -15,6 +15,7 @@ import {
   sendContractOptimizationQuestion,
   sendContractQuestion, 
   sendServerQuestion,
+  client_idl_code as clientIdlCode
 } from '../api/agent_calls';
 import { useAlert } from '@gear-js/react-hooks';
 import type { 
@@ -79,6 +80,11 @@ export const AISection = () => {
 
   const [aiResponseTitle, setAIResponseTitle] = useState(responseTitles[optionSelected]);
   const [codes, setCodes] = useState<[AgentCode, AgentCode]>([null, null]);
+  const [idlData, setIdlData] = useState({
+    idl: '',
+    client: '',
+    idlChanged: false,
+  });
   const [firstOptionSelected, setFirstOptionSelected] = useState(false); 
   const [dataToUse, setDataToUse] = useState<Data>({ 
     responseTitle: '',
@@ -87,11 +93,9 @@ export const AISection = () => {
   });
 
   const [contractHistory, setContractHistory] = useState<AgentResponse[]>([]);
-  // const contractOptimizationSet = useRef(false);
-  const [contractOptimizationSelected, setContractOptimizationSelected] = useState(false);
   const currentContractCode = useRef<{lib: string, service: string}>({
     lib: '',
-    service: ''
+    service: '',
   });
 
   const alert = useAlert();
@@ -101,7 +105,7 @@ export const AISection = () => {
     (
       dataToUse.optionSelected === 'Web3 abstraction' && (
         dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
-        dataToUse.frontendOptionSelected === 'GasLess/Server' ||
+        // dataToUse.frontendOptionSelected === 'GasLess/Server' ||
         dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
       )
     )
@@ -129,6 +133,7 @@ export const AISection = () => {
     setCodes([null, null]);
 
     let codes: [AgentCode, AgentCode] = [null, null];
+    let clientCode = '';
   
     try {
       switch (optionSelected) {
@@ -147,14 +152,27 @@ export const AISection = () => {
             return;
           }
 
+          if (idlData.idlChanged) {
+            console.log('Generating client code ...');
+            clientCode = await clientIdlCode(idl);
+            setIdlData({
+              idl,
+              client: clientCode,
+              idlChanged: false
+            });
+          } else {
+            console.log('Se reuso la data');
+            clientCode = idlData.client;
+          }
+
           switch (optionFrontendVariantSelected) {
             case 'Sailsjs':
               console.log('Sending frontend SailsJs question ...');
-              codes = await sendFrontendSailsjsQuestion(prompt, idl);
+              codes = [await sendFrontendSailsjsQuestion(prompt, idl), clientCode];
               break;
             case 'GearHooks':
               console.log('Sending frontend Gear Hooks question ...');
-              codes = await sendFrontendGearHooksQuestion(prompt, idl);
+              codes = [await sendFrontendGearHooksQuestion(prompt, idl), clientCode];
               break;
           }
           break;
@@ -164,7 +182,7 @@ export const AISection = () => {
           if (contractHistory.length > 8) {
             alert.error('cant be optimized further');
             setWaitingForAgent(false);
-            setContractOptimizationSelected(false);
+            // setContractOptimizationSelected(false);
             setCodes([
               currentContractCode.current.lib,
               currentContractCode.current.service
@@ -210,9 +228,22 @@ export const AISection = () => {
             alert.error('the idl is missing');
             return;
           }
+
+          if (idlData.idlChanged) {
+            console.log('Generating client code ...');
+            clientCode = await clientIdlCode(idl);
+            setIdlData({
+              idl,
+              client: clientCode,
+              idlChanged: false
+            });
+          } else {
+            console.log('Se reuso la data');
+            clientCode = idlData.client;
+          }
           
           console.log('Sending server question ...');
-          codes = await sendServerQuestion(prompt, idl);
+          codes = [await sendServerQuestion(prompt, idl), clientCode];
           break;        
         case 'Web3 abstraction': 
           const { optionAbstractionVariantSelected } = javascriptComponentSelected;
@@ -224,9 +255,22 @@ export const AISection = () => {
               return;
             }
 
+            if (idlData.idlChanged) {
+              console.log('Generating client code ...');
+              clientCode = await clientIdlCode(idl);
+              setIdlData({
+                idl,
+                client: clientCode,
+                idlChanged: false
+              });
+            } else {
+              console.log('Se reuso la data');
+              clientCode = idlData.client;
+            }
+
             console.log('sending web3 abstraction question ...');
 
-            codes = await sendWeb3AbstractionSignlessEzTransactionsQuestion(prompt, idl);
+            codes = [await sendWeb3AbstractionSignlessEzTransactionsQuestion(prompt, idl), clientCode];
             break;
           }
 
@@ -315,6 +359,12 @@ export const AISection = () => {
         <AIPromptArea 
           onSubmitPrompt={handleOnSubmitPrompt}
           onPromptChange={handleOnPromptChange}
+          onIdlChange={() => {
+            setIdlData({
+              ...idlData,
+              idlChanged: true
+            });
+          }}
           defaultPrompt={prompts[options.indexOf(optionSelected)]}
           disableComponents={waitingForAgent}
           optionVariants={ 
@@ -353,10 +403,6 @@ export const AISection = () => {
           // isContractQuestion={optionSelected === 'Smart Contracts'}
           
           updateContractButtonEnable={optionSelected === 'Smart Contracts' && contractHistory.length > 0}
-          onUpdateContractButtonPressed={() => {}}
-          // onContractOptimizationChange={checked => {
-          //   setContractOptimizationSelected(checked);
-          // }}
         />
 
         <VoiceRecorderButton 

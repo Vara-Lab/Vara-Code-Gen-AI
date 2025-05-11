@@ -9,20 +9,18 @@ const FRONTEND_WALLETCONNECT = 'walletconnect_frontend_agent';
 const FRONTEND_GEARJS = 'gearjs_frontend_agent';
 const FRONTEND_GEARHOOKS = 'gearhooks_frontend_agent';
 
-export const sendFrontendGearHooksQuestion = (question: string, idl: string): Promise<[string, string]> => {
+export const sendFrontendGearHooksQuestion = (question: string, idl: string): Promise<string> => {
     const url = API_URL + FRONTEND_GEARHOOKS;
     let response: AgentResponse | null = null;
-    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
             const temp = await axios.post(
                 url,
                 {
-                    question: question
+                    question: question + '\n\nIdl:\n' + idl
                 }
             );
-            client_code = await client_idl_code(idl);
 
             response = temp.data;
         } catch(e) {
@@ -49,7 +47,7 @@ export const sendFrontendGearHooksQuestion = (question: string, idl: string): Pr
 
         const hooksComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
 
-        resolve([hooksComponent, client_code]);   
+        resolve(hooksComponent);   
     });
 }
 
@@ -97,20 +95,18 @@ export const sendFrontendGearjsQuestion = (question: string): Promise<string> =>
     });
 }
 
-export const sendFrontendSailsjsQuestion = (question: string, idl: string): Promise<[string, string]> => {
+export const sendFrontendSailsjsQuestion = (question: string, idl: string): Promise<string> => {
     const url = API_URL + FRONTEND_SAILSJS;
     let response: AgentResponse | null = null;
-    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
             const temp = await axios.post(
                 url,
                 {
-                    question: question + '\n' + idl
+                    question: question + '\n\nidl:\n' + idl
                 }
             );
-            client_code = await client_idl_code(idl);   
 
             response = temp.data;
         } catch(e) {
@@ -137,6 +133,6 @@ export const sendFrontendSailsjsQuestion = (question: string, idl: string): Prom
 
         const sailsJsComponent = response.answer.replace(/javascript|```|jsx|tsx|typescript/g, "");
 
-        resolve([sailsJsComponent, client_code]);    
+        resolve(sailsJsComponent);    
     });
 };

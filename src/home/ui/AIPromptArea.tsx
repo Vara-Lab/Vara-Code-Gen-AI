@@ -23,6 +23,7 @@ import clsx from "clsx";
 interface Props {
   onSubmitPrompt: (prompt: string, idl: string | null, updateContract?: boolean) => void;
   onPromptChange?: (prompt: string) => void;
+  onIdlChange: () => void;
   disableComponents?: boolean;
   defaultPrompt?: string;
   optionVariants?: string[];
@@ -31,12 +32,13 @@ interface Props {
   onOptionVariantSelected?: (optionSelected: AIJavascriptComponentsOptions) => void;
   // isContractQuestion?: boolean;
   updateContractButtonEnable?: boolean;
-  onUpdateContractButtonPressed?: () => void;
+  // onUpdateContractButtonPressed?: () => void;
 }
 
 export const AIPromptArea = ({ 
   onSubmitPrompt, 
   onPromptChange, 
+  onIdlChange,
   disableComponents = false, 
   defaultPrompt = '', 
   optionVariants,
@@ -45,7 +47,7 @@ export const AIPromptArea = ({
   onOptionVariantSelected = () => {},
   // isContractQuestion = false,
   updateContractButtonEnable = false,
-  onUpdateContractButtonPressed = () => {},
+  // onUpdateContractButtonPressed = () => {},
 }: Props) => {
   const fileRef = useRef<string | null>(null);
   const [promptText, setPromptText] = useState(defaultPrompt);
@@ -55,6 +57,7 @@ export const AIPromptArea = ({
   const handleSubmitIDL = (fileContent: string, fileName: string) => {
     fileRef.current = fileContent;
     setIdlName(fileName);
+    onIdlChange();
   }
 
   const handlePromptText = (e:  React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -137,20 +137,18 @@ export const sendWeb3AbstractionGasLessEzTransactionsQuestion = (question: strin
     });
 };
 
-export const sendWeb3AbstractionSignlessEzTransactionsQuestion = (question: string, idl: string): Promise<[string, string]> => {
+export const sendWeb3AbstractionSignlessEzTransactionsQuestion = (question: string, idl: string): Promise<string> => {
     const url = API_URL + WEB3ABSTRACTION_SIGNLESS_EZ_TRANSACTIONS;
     let response: AgentResponse | null = null;
-    let client_code: string;
 
     return new Promise(async (resolve, reject) => {
         try {
             const temp = await axios.post(
                 url,
                 {
-                    question
+                    question: question + '\n\nIdl:\n' + idl
                 }
             );
-            client_code = await client_idl_code(idl);
             response = temp.data;
         } catch(e) {
             console.log(e);
@@ -176,6 +174,6 @@ export const sendWeb3AbstractionSignlessEzTransactionsQuestion = (question: stri
 
         const gaslessComponent = response.answer.replace(/javascript|```|jsx|typescript/g, "");
 
-        resolve([gaslessComponent, client_code]); 
+        resolve(gaslessComponent); 
     });
 };
