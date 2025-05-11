@@ -96,6 +96,7 @@ export const AIPromptArea = ({
             <Select 
               className={styles.selectFrontendOptions}
               disabled={disableComponents}
+              value={optionVariantSelected}
               onChange={(e) => {
                 const indexVariantSelected = optionVariants.indexOf(e.target.value);
                 const variantSelected = optionVariants[indexVariantSelected] as AIJavascriptComponentsOptions;
@@ -107,7 +108,7 @@ export const AIPromptArea = ({
                   return {
                     label: value,
                     value,
-                    selected: value === optionVariantSelected,
+                    // selected: value === optionVariantSelected,
                   }
                 })
               }

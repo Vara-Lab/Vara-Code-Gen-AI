@@ -161,7 +161,6 @@ export const AISection = () => {
               idlChanged: false
             });
           } else {
-            console.log('Se reuso la data');
             clientCode = idlData.client;
           }
 

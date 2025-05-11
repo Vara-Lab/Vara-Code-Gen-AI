@@ -18,8 +18,6 @@ export const sendContractOptimizationQuestion = (question: string, currentContra
         ${historyString}
         `;
 
-        console.log(agentQuestion);
-
         try {
             const temp = await axios.post(
                 url_contract_service,
