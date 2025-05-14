@@ -104,9 +104,9 @@ export const AISection = () => {
     (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
     (
       dataToUse.optionSelected === 'Web3 abstraction' && (
-        dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
+        dataToUse.frontendOptionSelected === 'GasLess/Frontend' // ||
         // dataToUse.frontendOptionSelected === 'GasLess/Server' ||
-        dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
+        // dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
       )
     )
       ? codes[0] as string
@@ -237,7 +237,6 @@ export const AISection = () => {
               idlChanged: false
             });
           } else {
-            console.log('Se reuso la data');
             clientCode = idlData.client;
           }
           
@@ -246,45 +245,68 @@ export const AISection = () => {
           break;        
         case 'Web3 abstraction': 
           const { optionAbstractionVariantSelected } = javascriptComponentSelected;
-          
-          if (optionAbstractionVariantSelected === 'SignLess/ez-transactions') {
-            if (!idl) {
-              setWaitingForAgent(false);
-              alert.error('the idl is missing');
-              return;
-            }
-
-            if (idlData.idlChanged) {
-              console.log('Generating client code ...');
-              clientCode = await clientIdlCode(idl);
-              setIdlData({
-                idl,
-                client: clientCode,
-                idlChanged: false
-              });
-            } else {
-              console.log('Se reuso la data');
-              clientCode = idlData.client;
-            }
-
-            console.log('sending web3 abstraction question ...');
-
-            codes = [await sendWeb3AbstractionSignlessEzTransactionsQuestion(prompt, idl), clientCode];
-            break;
-          }
-
 
           console.log('sending web3 abstraction question ...');
 
+          if (optionAbstractionVariantSelected === 'GasLess/Frontend') {
+            codes = [await sendWeb3AbstractionGasLessFrontendQuestion(prompt), null];
+            break;
+          }
+
+          if (optionAbstractionVariantSelected === 'GasLess/Server') {
+            codes = await sendWeb3AbstractionGasLessServerQuestion(prompt);
+            break;
+          }
+          
+          // if (optionAbstractionVariantSelected === 'SignLess/ez-transactions') {
+          //   if (!idl) {
+          //     setWaitingForAgent(false);
+          //     alert.error('the idl is missing');
+          //     return;
+          //   }
+
+          //   if (idlData.idlChanged) {
+          //     console.log('Generating client code ...');
+          //     clientCode = await clientIdlCode(idl);
+          //     setIdlData({
+          //       idl,
+          //       client: clientCode,
+          //       idlChanged: false
+          //     });
+          //   } else {
+          //     clientCode = idlData.client;
+          //   }
+
+          //   console.log('sending web3 abstraction question ...');
+
+          //   codes = [await sendWeb3AbstractionSignlessEzTransactionsQuestion(prompt, idl), clientCode];
+          //   break;
+          // }
+
+          if (!idl) {
+            setWaitingForAgent(false);
+            alert.error('the idl is missing');
+            return;
+          }
+
+          if (idlData.idlChanged) {
+            console.log('Generating client code ...');
+            clientCode = await clientIdlCode(idl);
+            setIdlData({
+              idl,
+              client: clientCode,
+              idlChanged: false
+            });
+          } else {
+            clientCode = idlData.client;
+          }
+
           switch (optionAbstractionVariantSelected) {
-            case 'GasLess/Frontend':
-              codes = [await sendWeb3AbstractionGasLessFrontendQuestion(prompt), null];
-              break;
-            case 'GasLess/Server':
-              codes = await sendWeb3AbstractionGasLessServerQuestion(prompt);
+            case 'SignLess/ez-transactions':
+              codes = [await sendWeb3AbstractionSignlessEzTransactionsQuestion(prompt, idl), clientCode];
               break;
             case 'GasLess/ez-transactions':
-              codes = [await sendWeb3AbstractionGasLessEzTransactionsQuestion(prompt), null];
+              codes = [await sendWeb3AbstractionGasLessEzTransactionsQuestion(prompt), clientCode];
               break;
           }
 
@@ -404,9 +426,9 @@ export const AISection = () => {
           updateContractButtonEnable={optionSelected === 'Smart Contracts' && contractHistory.length > 0}
         />
 
-        <VoiceRecorderButton 
+        {/* <VoiceRecorderButton 
           onResult={handleOnPromptChange}
-        />
+        /> */}
 
         {
           codes[0] && (
@@ -431,9 +453,9 @@ export const AISection = () => {
               code={ 
                 (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
                 (dataToUse.optionSelected === 'Web3 abstraction' && (
-                  dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
+                  dataToUse.frontendOptionSelected === 'GasLess/Frontend' // ||
                   // dataToUse.frontendOptionSelected === 'GasLess/Server' ||
-                  dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
+                  // dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
                 ))
                   ? codes[0] as string
                   : codes[firstOptionSelected ? 0 : 1] as string
@@ -446,9 +468,10 @@ export const AISection = () => {
                       !(
                         (dataToUse.optionSelected === 'Frontend' && dataToUse.frontendOptionSelected === 'Gearjs') ||
                         (dataToUse.optionSelected === 'Web3 abstraction' && (
-                          dataToUse.frontendOptionSelected === 'GasLess/Frontend' ||
+                          dataToUse.frontendOptionSelected === 'GasLess/Frontend' // ||
                           // dataToUse.frontendOptionSelected === 'GasLess/Server' ||
-                          dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'))
+                          // dataToUse.frontendOptionSelected === 'GasLess/ez-transactions'
+                        ))
                       )
                     ) && (
                       <>
