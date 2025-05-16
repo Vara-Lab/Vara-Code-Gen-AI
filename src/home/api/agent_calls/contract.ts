@@ -22,9 +22,6 @@ export const sendContractAuditQuestion = (currentCode: string): Promise<[string,
             );
 
             response = temp.data;
-            console.log("response");
-            console.log(response);
-            
         } catch (e) {
             console.log(e);
             const error_message = (e as Error).message;
@@ -57,7 +54,6 @@ export const sendContractAuditQuestion = (currentCode: string): Promise<[string,
         const contractLib = await contract_lib(response.answer);
 
         resolve([contractLib, response.answer.replace(/rust|```/g, "")]);
-        // console.log(response.answer.replace(/rust|```/g, ""));
     });
 }
 
@@ -300,7 +296,7 @@ const contract_lib = (contractService: String): Promise<string> => {
         const matches = response.answer.match(rustCodeRegex) || [];
 
         if (matches.length < 1) {
-            console.log('Invalid code!!! creacion de lib')
+            console.log('Invalid code!!! creacion de lib');
             // reject('Code provided by agent is not in rust language');
             // return;
         }

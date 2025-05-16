@@ -241,7 +241,12 @@ export const AISection = () => {
 
             break;
           }
+
           codes = await sendContractQuestion(prompt);
+
+          currentContractCode.current.lib = codes[0] as string;
+          currentContractCode.current.service = codes[1] as string;
+
           setContractHistory([{
             userPrompt: prompt,
             agentResponse: `${codes[0]}\n${codes[1]}`,

@@ -32,7 +32,7 @@ export const AIResponse = ({
     return text.split("\n").length;
   }
 
-  const calcularAltura = (numLines: number) => {
+  const calculateHeigh = (numLines: number) => {
       if (numLines <= 12) {
           return 240; // 240px for 0 to 12 lines
       } else if (numLines >= 34) {
@@ -43,10 +43,10 @@ export const AIResponse = ({
       }
   }
 
-  const [componentHeigh, setComponentHeigh] = useState(calcularAltura(countLines(code)));
+  const [componentHeigh, setComponentHeigh] = useState(calculateHeigh(countLines(code)));
 
   useEffect(() => {
-    setComponentHeigh(calcularAltura(countLines(code)));
+    setComponentHeigh(calculateHeigh(countLines(code)));
   }, [code]);
 
   return (
@@ -72,7 +72,7 @@ export const AIResponse = ({
             theme={dracula}
             editable={editable}
             onChange={(value, _) => {
-              setComponentHeigh(calcularAltura(countLines(value)));
+              setComponentHeigh(calculateHeigh(countLines(value)));
               onCodeChange(value);
             }}
           />
