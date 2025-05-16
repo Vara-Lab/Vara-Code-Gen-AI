@@ -1,5 +1,5 @@
 import { AIInteractionContainer } from './AIInteractionContainer';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from '../styles/ai_response.module.scss';
 import clsx from 'clsx';
 // import { CodeBlock, dracula } from 'react-code-blocks';
@@ -26,29 +26,56 @@ export const AIResponse = ({
   lang, 
   onCodeChange = () => {}, 
   editable = false,
-  isUnderReview = true
+  isUnderReview = false
 }: Props) => {
+  const countLines = (text: string): number => {
+    return text.split("\n").length;
+  }
+
+  const calcularAltura = (numLines: number) => {
+      if (numLines <= 12) {
+          return 240; // 240px for 0 to 12 lines
+      } else if (numLines >= 34) {
+          return 640; // max size for 34 lines or more
+      } else {
+          let incrementPerLines = (640 - 240) / (34 - 12);
+          return 240 + (numLines - 13) * incrementPerLines;
+      }
+  }
+
+  const [componentHeigh, setComponentHeigh] = useState(calcularAltura(countLines(code)));
+
+  useEffect(() => {
+    setComponentHeigh(calcularAltura(countLines(code)));
+  }, [code]);
+
   return (
     <AIInteractionContainer
       interactionTitle={responseTitle}
       leftSideChildren={cornerLeftButtons}
     >
-      <div
-        className={clsx(
-          styles.codeContainer,
-        )}
-      >
-        <CodeMirror
-          value={code}
-          // height="550px"
-          // maxHeight='550px'
-          extensions={lang === 'rust' ? [rust()] : [javascript()]}
-          theme={dracula}
-          editable={editable}          
-          onChange={(value, _) => {
-            onCodeChange(value);
-          }}
-        />
+      <div className={clsx(styles.codeContainer)}>
+          {
+            isUnderReview && <div 
+              className={styles.codeBlock} 
+              style={{
+                height: `${componentHeigh}px`,
+                marginBottom: `${-componentHeigh}px`,
+              }}
+            />
+          }
+          <CodeMirror
+            value={code}
+            minHeight='240px'
+            className={styles.codeMirror}
+            extensions={lang === 'rust' ? [rust()] : [javascript()]}
+            theme={dracula}
+            editable={editable}
+            onChange={(value, _) => {
+              setComponentHeigh(calcularAltura(countLines(value)));
+              onCodeChange(value);
+            }}
+          />
       </div>
     </AIInteractionContainer>
   );

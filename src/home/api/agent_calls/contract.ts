@@ -5,6 +5,58 @@ const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const CONTRACT_SERVICE_URL = 'service_smartcontract_agent';
 const CONTRACT_LIB_URL = 'lib_smartcontract_agent';
 const CONTRACT_OPTIMIZATION = 'optimization_smartcontract_agent';
+const CONTRACT_AUDIT = '/audit_smartcontract';
+
+export const sendContractAuditQuestion = (currentCode: string): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+        const url_contract_service = API_URL + CONTRACT_AUDIT;
+
+        let response: AgentResponse | null = null;
+
+        try {
+            const temp = await axios.post(
+                url_contract_service,
+                {
+                    question: currentCode
+                }
+            );
+
+            response = temp.data;
+            console.log("response");
+            console.log(response);
+            
+        } catch (e) {
+            console.log(e);
+            const error_message = (e as Error).message;
+            reject(`Error: ${error_message}`);
+            return;
+        }
+
+        if (!response) {
+            reject('Not answer received');
+            return;
+        }
+
+        if ('error' in response) {
+            reject(`Error: ${response.error}`);
+            return;
+        }
+
+        if (!response.answer) {
+            reject('No response from server');
+            return;
+        }
+
+        if (typeof response.answer !== 'string') {
+            const serializedAnswer = JSON.stringify(response.answer, null, 2);
+            console.log("Unexpected format for data.answer:" + response.answer);
+            reject(serializedAnswer);
+            return;
+        }
+
+        resolve(response.answer.replace(/rust|```/g, ""));
+    });
+}
 
 export const sendContractOptimizationQuestion = (question: string, currentContractCode: string, historyString: string): Promise<[string, string]> => {
     return new Promise(async (resolve, reject) => {

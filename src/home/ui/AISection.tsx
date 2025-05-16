@@ -13,6 +13,7 @@ import {
   sendFrontendGearjsQuestion,
   sendFrontendGearHooksQuestion,
   sendContractOptimizationQuestion,
+  sendContractAuditQuestion,
   sendContractQuestion, 
   sendServerQuestion,
   client_idl_code as clientIdlCode
@@ -25,6 +26,7 @@ import type {
 import { VoiceRecorderButton } from './VoiceRecording';
 import { AgentResponse } from '../models/agent_question';
 import styles from '../styles/ai_section.module.scss';
+import { sleep } from '@/app/utils';
 
 type AgentCode = string | null;
 
@@ -78,6 +80,12 @@ export const AISection = () => {
     frontendVariantSelected: true
   });
 
+
+
+  const [contractInAudit, setContractInAudit] = useState(false);
+
+
+
   const [aiResponseTitle, setAIResponseTitle] = useState(responseTitles[optionSelected]);
   const [codes, setCodes] = useState<[AgentCode, AgentCode]>([null, null]);
   const [idlData, setIdlData] = useState({
@@ -113,7 +121,7 @@ export const AISection = () => {
       : codes[firstOptionSelected ? 0 : 1] as string
   );
 
-  const handleOnSubmitPrompt = async (prompt: string, idl: string | null = '', updateContract = false) => {
+  const handleOnSubmitPrompt = async (prompt: string, idl: string | null = '', updateContract = false, auditContract = false) => {
     if (prompt.length == 0) {
       console.error('prompt cant be empty');
       alert.error('Prompt cant be empty')
@@ -130,7 +138,8 @@ export const AISection = () => {
       frontendOptionSelected: optionJavascriptSelected  // optionFrontendVariantSelected
     });
     setWaitingForAgent(true);
-    setCodes([null, null]);
+    if (!auditContract) setCodes([null, null]);
+    else setContractInAudit(true);
 
     let codes: [AgentCode, AgentCode] = [null, null];
     let clientCode = '';
@@ -178,7 +187,19 @@ export const AISection = () => {
         case 'Smart Contracts':
           console.log('Sendind contract question ...');
 
-          if (contractHistory.length > 8) {
+          if (auditContract) {
+            console.log('Sending contract audit question ...');
+            await sleep(10);
+            // codes = [await sendContractAuditQuestion(prompt), '' as AgentCode];
+            setWaitingForAgent(false);
+            setContractInAudit(false);
+            console.log('Termino la auditoria');
+            
+            // setCodes(codes);
+            return;
+          }
+
+          if (updateContract && contractHistory.length > 8) {
             alert.error('cant be optimized further');
             setWaitingForAgent(false);
             // setContractOptimizationSelected(false);
@@ -444,7 +465,8 @@ export const AISection = () => {
                   }
                 }
               }}
-              editable={optionSelected === 'Smart Contracts'}
+              isUnderReview={contractInAudit}
+              editable={optionSelected === 'Smart Contracts' && !waitingForAgent}
               responseTitle={
                 dataToUse.optionSelected !== 'Web3 abstraction'
                 ? dataToUse.responseTitle[ firstOptionSelected ? 0 : 1 ]

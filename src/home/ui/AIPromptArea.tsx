@@ -21,7 +21,7 @@ import styles from '../styles/ai_prompt_area.module.scss';
 import clsx from "clsx";
 
 interface Props {
-  onSubmitPrompt: (prompt: string, idl: string | null, updateContract?: boolean) => void;
+  onSubmitPrompt: (prompt: string, idl: string | null, updateContract?: boolean, auditContract?: boolean) => void;
   onPromptChange?: (prompt: string) => void;
   onIdlChange: () => void;
   disableComponents?: boolean;
@@ -78,6 +78,10 @@ export const AIPromptArea = ({
     onSubmitPrompt(promptText, fileRef.current, true);
   }
 
+  const handleOnAuditContract = () => {
+    onSubmitPrompt(promptText, fileRef.current, false, true);
+  }
+
   const handleOnSubmitPrompt = () => {
     onSubmitPrompt(promptText, fileRef.current);
   }
@@ -116,18 +120,32 @@ export const AIPromptArea = ({
           }
           {
             updateContractButtonEnable && (
-              <Button 
-                text="Update"
-                size="x-large"
-                isLoading={disableComponents}
-                onClick={handleOnUpdateContract}
-                className={
-                  clsx(
-                    styles.button,
-                    styles.buttonGreen
-                  )
-                }
-              />
+              <>
+                <Button 
+                  text="Audit"
+                  size="x-large"
+                  isLoading={disableComponents}
+                  onClick={handleOnAuditContract}
+                  className={
+                    clsx(
+                      styles.button,
+                      styles.buttonGreen
+                    )
+                  }
+                />
+                <Button 
+                  text="Update"
+                  size="x-large"
+                  isLoading={disableComponents}
+                  onClick={handleOnUpdateContract}
+                  className={
+                    clsx(
+                      styles.button,
+                      styles.buttonGreen
+                    )
+                  }
+                />
+              </>
             )
           }
           <Button 
