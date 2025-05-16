@@ -189,14 +189,19 @@ export const AISection = () => {
 
           if (auditContract) {
             console.log('Sending contract audit question ...');
-            await sleep(10);
-            // codes = [await sendContractAuditQuestion(prompt), '' as AgentCode];
-            setWaitingForAgent(false);
+
+            const currentContractCodeString = `
+              ${currentContractCode.current.lib}\n\n
+              ${currentContractCode.current.service}
+            `;
+
+            codes = await sendContractAuditQuestion(currentContractCodeString);
+
+            currentContractCode.current.lib = codes[0] as string;
+            currentContractCode.current.service = codes[1] as string;
+
             setContractInAudit(false);
-            console.log('Termino la auditoria');
-            
-            // setCodes(codes);
-            return;
+            break;
           }
 
           if (updateContract && contractHistory.length > 8) {

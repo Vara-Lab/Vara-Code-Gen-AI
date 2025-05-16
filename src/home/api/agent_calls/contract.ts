@@ -5,9 +5,9 @@ const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const CONTRACT_SERVICE_URL = 'service_smartcontract_agent';
 const CONTRACT_LIB_URL = 'lib_smartcontract_agent';
 const CONTRACT_OPTIMIZATION = 'optimization_smartcontract_agent';
-const CONTRACT_AUDIT = '/audit_smartcontract';
+const CONTRACT_AUDIT = 'audit_smartcontract';
 
-export const sendContractAuditQuestion = (currentCode: string): Promise<string> => {
+export const sendContractAuditQuestion = (currentCode: string): Promise<[string, string]> => {
     return new Promise(async (resolve, reject) => {
         const url_contract_service = API_URL + CONTRACT_AUDIT;
 
@@ -54,7 +54,10 @@ export const sendContractAuditQuestion = (currentCode: string): Promise<string> 
             return;
         }
 
-        resolve(response.answer.replace(/rust|```/g, ""));
+        const contractLib = await contract_lib(response.answer);
+
+        resolve([contractLib, response.answer.replace(/rust|```/g, "")]);
+        // console.log(response.answer.replace(/rust|```/g, ""));
     });
 }
 
