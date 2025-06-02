@@ -29,31 +29,44 @@ export const sendContractAuditQuestion = (currentCode: string): Promise<[string,
             return;
         }
 
+        
         if (!response) {
             reject('Not answer received');
             return;
         }
-
+        
         if ('error' in response) {
             reject(`Error: ${response.error}`);
             return;
         }
-
-        if (!response.answer) {
+        
+        let { answer } = response;
+        
+        if (!answer) {
             reject('No response from server');
             return;
         }
 
-        if (typeof response.answer !== 'string') {
-            const serializedAnswer = JSON.stringify(response.answer, null, 2);
-            console.log("Unexpected format for data.answer:" + response.answer);
+        console.log('Respuesta para el servicio qlero xd');
+        console.log(answer);
+        
+        if (typeof answer !== 'string') {
+            const serializedAnswer = JSON.stringify(answer, null, 2);
+            console.log("Unexpected format for data.answer:" + answer);
             reject(serializedAnswer);
             return;
         }
 
-        const contractLib = await contract_lib(response.answer);
+        let correctCode = answer.search('#[program]') != -1 ||
+            (answer.search('#[service]') == -1 || answer.search('sails_rs::service') == -1);
 
-        resolve([contractLib, response.answer.replace(/rust|```/g, "")]);
+        if (!correctCode) {
+            reject('Code error!! Review the structure of your service code');
+        }
+
+        const contractLib = await contract_lib(answer);
+
+        resolve([contractLib, answer.replace(/rust|```/g, "")]);
     });
 }
 
