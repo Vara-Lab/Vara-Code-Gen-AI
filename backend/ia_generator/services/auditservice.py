@@ -1,16 +1,7 @@
-import json
-import time
-import csv
-import datetime
-import requests
-import os
 import openai
-from flask import Blueprint, jsonify, current_app, request
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from openai import OpenAI
 from ..exceptions.exceptions import OpenAIServiceError
 from config import get_openai_api_key
-
 
 class AuditService:
    
