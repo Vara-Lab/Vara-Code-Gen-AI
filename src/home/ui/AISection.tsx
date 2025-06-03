@@ -239,9 +239,14 @@ export const AISection = () => {
             ]);
             return;
           }
-          
+
           // if (contractOptimizationSelected && contractHistory.length > 0 && contractHistory.length < 9) {
-          if (updateContract && contractHistory.length > 0 && contractHistory.length < 9) {
+          if (
+            updateContract && 
+            (contractHistory.length > 0 || serviceCode.length > 0) && 
+            contractHistory.length < 9
+          ) {
+            console.log('Sending contract update question ...');
             const contractCode = `
             ${currentContractCode.current.lib}\n
             ${currentContractCode.current.service}
@@ -435,9 +440,7 @@ export const AISection = () => {
             waitingForResponse={waitingForAgent}
         />
         <AIPromptArea 
-          onSubmitPrompt={(prompt: string, idl: string | null, _generateButtonPressed, updateContract?: boolean, auditContract?: boolean) => {
-            handleOnSubmitPrompt(prompt, idl, updateContract, auditContract);
-          }}
+          onSubmitPrompt={handleOnSubmitPrompt}
           onPromptChange={handleOnPromptChange}
           onLibRustCodeChange={(code: string) => {
             // let serviceCode = codes[1] ?? ' ';

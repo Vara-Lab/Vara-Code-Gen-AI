@@ -26,7 +26,7 @@ import clsx from "clsx";
 const GITCLONE = 'git clone ';
 
 interface Props {
-  onSubmitPrompt: (prompt: string, idl: string | null, generateButtonPressed: boolean, updateContract?: boolean, auditContract?: boolean) => void;
+  onSubmitPrompt: (prompt: string, idl: string | null, updateContract?: boolean, auditContract?: boolean) => void;
   onPromptChange?: (prompt: string) => void;
   onIdlChange: () => void;
   onServiceRustCodeChange: (code: string) => void;
@@ -110,11 +110,11 @@ export const AIPromptArea = ({
   }
 
   const handleOnUpdateContract = () => {
-    onSubmitPrompt(promptText, fileRef.current, false, true);
+    onSubmitPrompt(promptText, fileRef.current, true);
   }
 
   const handleOnAuditContract = () => {
-    onSubmitPrompt(promptText, fileRef.current, false, false, true);
+    onSubmitPrompt(promptText, fileRef.current, false, true);
   }
 
   const handleOnSubmitPrompt = () => {

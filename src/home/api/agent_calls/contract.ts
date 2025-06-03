@@ -47,9 +47,6 @@ export const sendContractAuditQuestion = (currentCode: string): Promise<[string,
             return;
         }
 
-        console.log('Respuesta para el servicio qlero xd');
-        console.log(answer);
-        
         if (typeof answer !== 'string') {
             const serializedAnswer = JSON.stringify(answer, null, 2);
             console.log("Unexpected format for data.answer:" + answer);
