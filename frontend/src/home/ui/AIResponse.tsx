@@ -2,12 +2,10 @@ import { AIInteractionContainer } from './AIInteractionContainer';
 import React, {useEffect, useState} from 'react';
 import styles from '../styles/ai_response.module.scss';
 import clsx from 'clsx';
-// import { CodeBlock, dracula } from 'react-code-blocks';
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { rust } from "@codemirror/lang-rust";
 import { dracula } from "@uiw/codemirror-theme-dracula";
-// import Editor from "@monaco-editor/react";
 
 interface Props {
   responseTitle: string;

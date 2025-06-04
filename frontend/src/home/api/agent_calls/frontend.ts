@@ -1,4 +1,5 @@
 import { client_idl_code } from "@/home/api/agent_calls/idl";
+import { AGENT_API_KEY } from "@/consts";
 import type { AgentResponse } from "@/home/models/agent_call";
 import axios from "axios";
 
@@ -19,6 +20,11 @@ export const sendFrontendGearHooksQuestion = (question: string, idl: string): Pr
                 url,
                 {
                     question: question + '\n\nIdl:\n' + idl
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -62,6 +68,11 @@ export const sendFrontendGearjsQuestion = (question: string): Promise<string> =>
                 url,
                 {
                     question: question
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
             // client_code = await client_idl_code(idl);
@@ -105,6 +116,11 @@ export const sendFrontendSailsjsQuestion = (question: string, idl: string): Prom
                 url,
                 {
                     question: question + '\n\nidl:\n' + idl
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 

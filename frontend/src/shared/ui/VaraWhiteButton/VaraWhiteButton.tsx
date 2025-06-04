@@ -6,6 +6,7 @@ interface Props {
 }
 
 export const VaraWhiteButton = ({ text }: Props) => {
+    
     return (
         <Button 
             text={text} 

@@ -1,4 +1,5 @@
 import { AgentResponse } from "@/home/models/agent_call";
+import { AGENT_API_KEY } from "@/consts";
 import axios from "axios";
 
 const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
@@ -18,6 +19,11 @@ export const sendContractAuditQuestion = (currentCode: string): Promise<[string,
                 url_contract_service,
                 {
                     question: currentCode
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -84,6 +90,11 @@ export const sendContractOptimizationQuestion = (question: string, currentContra
                 url_contract_service,
                 {
                     question: agentQuestion
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -149,6 +160,11 @@ export const sendContractDefiQuestion = (question: string): Promise<String> => {
                 url_contract_service,
                 {
                     question
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -186,7 +202,7 @@ export const sendContractDefiQuestion = (question: string): Promise<String> => {
         const matches = response.answer.match(rustCodeRegex) || [];
 
         if (matches.length < 1) {
-            console.log('Invalid code!!! creacion de defi')
+            console.log('Invalid code!!!')
             // reject('Code provided by agent is not in rust language');
             // return;
         }
@@ -209,6 +225,11 @@ const contract_service = (question: string): Promise<string> => {
                 url_contract_service,
                 {
                     question
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -248,7 +269,7 @@ const contract_service = (question: string): Promise<string> => {
         if (matches.length < 1) {
             // reject('Code provided by agent is not in rust language');
             // return;
-            console.log('Invalid code!!! creacion de service')
+            console.log('Invalid code!!!')
         }
 
         const extractedRustCode = response.answer
@@ -269,6 +290,11 @@ const contract_lib = (contractService: String): Promise<string> => {
                 url_contract_service,
                 {
                     question: contractService
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 

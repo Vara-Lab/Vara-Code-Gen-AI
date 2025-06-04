@@ -1,10 +1,12 @@
 const ADDRESS = {
-    NODE: process.env.REACT_APP_NODE_ADDRESS as string,
-  };
-  
-  const LOCAL_STORAGE = {
-    ACCOUNT: 'account',
-  };
-  
-  export { ADDRESS, LOCAL_STORAGE };
+  NODE: import.meta.env.VITE_NODE_ADDRESS
+};
+
+const AGENT_API_KEY = import.meta.env.VITE_AGENT_API_KEY;
+
+const LOCAL_STORAGE = {
+  ACCOUNT: 'account',
+};
+
+  export { ADDRESS, AGENT_API_KEY, LOCAL_STORAGE };
   

@@ -1,4 +1,5 @@
 import { client_idl_code } from "@/home/api/agent_calls/idl";
+import { AGENT_API_KEY } from "@/consts";
 import type { AgentResponse } from "@/home/models/agent_call";
 import axios from "axios";
 
@@ -19,6 +20,11 @@ export const sendWeb3AbstractionGasLessFrontendQuestion = (question: string): Pr
                 url,
                 {
                     question
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -62,6 +68,11 @@ export const sendWeb3AbstractionGasLessServerQuestion = (question: string): Prom
                 url,
                 {
                     question
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
             client_code = await client_idl_code(question);
@@ -105,6 +116,11 @@ export const sendWeb3AbstractionGasLessEzTransactionsQuestion = (question: strin
                 url,
                 {
                     question
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 
@@ -147,6 +163,11 @@ export const sendWeb3AbstractionSignlessEzTransactionsQuestion = (question: stri
                 url,
                 {
                     question: question + '\n\nIdl:\n' + idl
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
             response = temp.data;

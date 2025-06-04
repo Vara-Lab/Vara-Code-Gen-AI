@@ -1,4 +1,5 @@
 import { client_idl_code } from "@/home/api/agent_calls/idl";
+import { AGENT_API_KEY } from "@/consts";
 import type { AgentResponse } from "@/home/models/agent_call";
 import axios from "axios";
 
@@ -35,6 +36,11 @@ const server_script_code = (question: string, idl: string): Promise<string> => {
                 url,
                 {
                     question: question + '\n' + idl
+                },
+                {
+                    headers: {
+                        'X-API-Key': AGENT_API_KEY
+                    }
                 }
             );
 

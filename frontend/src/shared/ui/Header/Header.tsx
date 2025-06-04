@@ -13,12 +13,10 @@ interface Props {
 export const Header = ({ backgroundColor = 'transparent', children }: Props) => {
   return (
     <>
-      {/* <header className={clsx(styles.header, styles['header--' + backgroundColor])}> */}
       <header className={clsx(styles.header)}>
-
         <div className={styles['header-main']} >
           <Logo />
-          <VaraWhiteButton text='Sign in' />
+          {/* <VaraWhiteButton text='Sign in' /> */}
         </div>
         <div>
           {children}

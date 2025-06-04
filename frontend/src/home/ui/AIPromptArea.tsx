@@ -292,32 +292,6 @@ export const AIPromptArea = ({
               onRustFileSubmit={handleSubmitLibrsRustFile}
               disableButton={disableComponents}
             />
-            {/* <Button 
-              text="Add service.rs"
-              icon={AddIcon}
-              size="x-large"
-              isLoading={disableComponents}
-              //onClick={handleOnSubmitPrompt}
-              className={
-                clsx(
-                  styles.button,
-                  styles.contractButtonAddition
-                )
-              }
-            />
-            <Button 
-              text="Add lib.rs"
-              icon={AddIcon}
-              size="x-large"
-              isLoading={disableComponents}
-              //onClick={handleOnSubmitPrompt}
-              className={
-                clsx(
-                  styles.button,
-                  styles.contractButtonAddition
-                )
-              }
-            /> */}
           </div>
         )
       }
