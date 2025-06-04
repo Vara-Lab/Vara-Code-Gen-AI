@@ -1,4 +1,4 @@
-
+import os
 # === Third-party Libraries ===
 import requests
 from flask import Blueprint, request, jsonify
@@ -62,9 +62,12 @@ def service_smartcontract_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "smart_contract_data", "services_data")
+
         answer = smart_contract_handler(
             SERVICE_SMART_CONTRACT_PROMPT,
-            "training_data/smart_contract_data/services_data",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -78,9 +81,13 @@ def lib_smartcontract_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "smart_contract_data", "lib_rs_data")
+
         answer = smart_contract_handler(
             LIB_SMART_CONTRACT_PROMPT,
-            "training_data/smart_contract_data/lib_rs_data",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -94,9 +101,13 @@ def optimization_smartcontract_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "smart_contract_data", "optimization_contracts")
+
         answer = smart_contract_handler(
             OPTIMIZATION_SMART_CONTRACT_PROMPT,
-            "training_data/smart_contract_data/optimization_contracts",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -111,9 +122,13 @@ def client_server_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "server_data", "client")
+
         answer = server_agent_handler(
             CLIENT_SERVER_PROMPT,
-            "training_data/server_data/client",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -127,9 +142,13 @@ def script_server_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "server_data", "script")
+
         answer = server_agent_handler(
             SCRIPT_SERVER_PROMPT,
-            "training_data/server_data/script",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -144,9 +163,13 @@ def gasless_ez_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "web3_abstraction", "gasless_ez_transactions")
+
         answer = web3_abstraction_handler(
             GASLESS_EZ_WEB3_PROMPT,
-            "training_data/web3_abstraction/gasless_ez_transactions",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -160,9 +183,13 @@ def signless_ez_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "web3_abstraction", "signless_ez_transactions")
+
         answer = web3_abstraction_handler(
             SIGNLESS_EZ_WEB3_PROMPT,
-            "training_data/web3_abstraction/signless_ez_transactions",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -176,9 +203,13 @@ def gasless_server_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "web3_abstraction", "gasless_server_script")
+
         answer = web3_abstraction_handler(
             GASLESS_SERVER_SCRIPT_PROMPT,
-            "training_data/web3_abstraction/gasless_server_script",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -192,9 +223,13 @@ def sailsjs_frontend_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "frontend_data", "sails_js")
+
         answer = frontend_agent_handler(
             SAILSJS_PROMPT,
-            "training_data/frontend_data/sails_js",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -208,9 +243,13 @@ def gearjs_frontend_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "frontend_data", "gear_js")
+
         answer = frontend_agent_handler(
             GEARJS_PROMPT,
-            "training_data/frontend_data/gear_js",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
@@ -224,9 +263,14 @@ def gearhooks_frontend_agent():
     if not question:
         return jsonify({"error": "Missing `question` field"}), 400
     try:
+
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        data_path = os.path.join(base_dir, "training_data", "frontend_data", "gear_hooks")
+
+        
         answer = frontend_agent_handler(
             GEARHOOKS_PROMPT,
-            "training_data/frontend_data/gear_hooks",
+            data_path,
             question
         )
         return jsonify({"question": question, "answer": answer})
