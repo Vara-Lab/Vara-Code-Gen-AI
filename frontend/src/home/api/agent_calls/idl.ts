@@ -1,8 +1,7 @@
 import { AgentResponse } from "@/home/models/agent_call";
-import { AGENT_API_KEY } from "@/consts";
+import { AGENT_API_KEY, API_URL } from "@/consts";
 import axios from "axios";
 
-const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const IDL_CLIENT_URL = 'client_server_agent';
 
 export const client_idl_code = (idl: string): Promise<string> => {

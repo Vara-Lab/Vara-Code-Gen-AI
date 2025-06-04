@@ -1,8 +1,7 @@
 import { AgentResponse } from "@/home/models/agent_call";
-import { AGENT_API_KEY } from "@/consts";
+import { AGENT_API_KEY, API_URL } from "@/consts";
 import axios from "axios";
 
-const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const CONTRACT_SERVICE_URL = 'service_smartcontract_agent';
 const CONTRACT_LIB_URL = 'lib_smartcontract_agent';
 const CONTRACT_OPTIMIZATION = 'optimization_smartcontract_agent';
@@ -228,6 +227,7 @@ const contract_service = (question: string): Promise<string> => {
                 },
                 {
                     headers: {
+                        'Content-Type': 'application/json',
                         'X-API-Key': AGENT_API_KEY
                     }
                 }

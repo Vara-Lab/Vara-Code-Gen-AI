@@ -1,9 +1,8 @@
 import { client_idl_code } from "@/home/api/agent_calls/idl";
-import { AGENT_API_KEY } from "@/consts";
+import { AGENT_API_KEY, API_URL } from "@/consts";
 import type { AgentResponse } from "@/home/models/agent_call";
 import axios from "axios";
 
-const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const WEB3ABSTRACTION_GASLESS_FRONTEND = 'gasless_frontend_agent';
 const WEB3ABSTRACTION_GASLESS_SERVER = 'gasless_server_script_web3abstraction_agent';
 const WEB3ABSTRACTION_GASLESS_EZ_TRANSACTIONS = 'gasless_ez_web3abstraction_agent';

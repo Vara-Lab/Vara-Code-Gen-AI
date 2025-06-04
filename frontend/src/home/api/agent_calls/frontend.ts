@@ -1,9 +1,8 @@
 import { client_idl_code } from "@/home/api/agent_calls/idl";
-import { AGENT_API_KEY } from "@/consts";
+import { AGENT_API_KEY, API_URL } from "@/consts";
 import type { AgentResponse } from "@/home/models/agent_call";
 import axios from "axios";
 
-const API_URL = 'https://vara-code-gen-ia-api.vercel.app/ia-generator/';
 const FRONTEND_SAILSCALLS = 'sailscalls_frontend_agent';
 const FRONTEND_SAILSJS = 'sailsjs_frontend_agent';
 const FRONTEND_WALLETCONNECT = 'walletconnect_frontend_agent';
