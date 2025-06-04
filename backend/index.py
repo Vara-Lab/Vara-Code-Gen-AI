@@ -13,11 +13,12 @@ def create_app(config_name="development"):
     app.config.from_object(config[config_name])
 
     # === CORS ===
-    CORS(app, resources={
-        r"/ia-generator/*": {
-            "origins": app.config["ALLOWED_ORIGINS"]
-        }
-    })
+    CORS(
+    app,
+    resources={r"/*": {"origins": app.config["ALLOWED_ORIGINS"]}},
+    allow_headers=["Content-Type", "X-API-Key"],
+    supports_credentials=True
+    )
 
     # === Rate Limiter ===
     Limiter(
