@@ -1,8 +1,12 @@
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from flask import Flask, Blueprint, jsonify, request, abort
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import os
 
 from ia_generator.routes.ia_routes import ia_generator_bp
 from config import config
@@ -20,6 +24,7 @@ def create_app(config_name="development"):
     supports_credentials=True
     )
 
+
     # === Rate Limiter ===
     Limiter(
         get_remote_address,
@@ -30,7 +35,12 @@ def create_app(config_name="development"):
 
 
     @app.before_request
-    def restrict_access_by_token():
+    def global_request_middleware():
+        
+        if request.method == 'OPTIONS':
+            return '', 200
+
+
         if request.path.startswith("/ia-generator"):
             token = request.headers.get("X-API-Key")
             if not token or token != app.config["API_KEY"]:
