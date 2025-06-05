@@ -14,6 +14,14 @@ def get_openai_api_key() -> str:
     return key
 
 
+def get_allowed_origins() -> list[str]:
+    """
+    Get ALLOWED_ORIGINS from environment variable.
+    """
+    origins = os.getenv("ALLOWED_ORIGINS", "")
+    return [origin.strip() for origin in origins.split(",") if origin.strip()]
+
+
 class Config:
     """Base configuration."""
     DEBUG = False
@@ -24,19 +32,14 @@ class Config:
     RATELIMIT_DEFAULT = "100/hour"
     RATELIMIT_STORAGE_URI = "memory://"
 
-    ALLOWED_ORIGINS = [
-        "http://localhost:3000",
-        "https://vara-code-gen-ai.vercel.app/"
-    ]
+    ALLOWED_ORIGINS = get_allowed_origins()
 
-   
+
 class DevelopmentConfig(Config):
     DEBUG = True
-    ALLOWED_ORIGINS = ["https://vara-code-gen-ai.vercel.app/"]
 
 
 class ProductionConfig(Config):
-    ALLOWED_ORIGINS = ["https://vara-code-gen-ai.vercel.app/"]
     DEBUG = False
 
 
